@@ -1,3 +1,5 @@
+import React from 'react'
+
 type BadgeVariant =
   | 'block' | 'allow' | 'review'
   | 'critical' | 'high' | 'medium' | 'low'
@@ -7,13 +9,12 @@ interface BadgeProps {
   variant?: BadgeVariant
   children: React.ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
-import React from 'react'
-
-export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
+export function Badge({ variant = 'neutral', children, className = '', style }: BadgeProps) {
   return (
-    <span className={`badge badge-${variant} ${className}`.trim()}>
+    <span className={`badge badge-${variant} ${className}`.trim()} style={style}>
       {variant === 'live' && (
         <span
           style={{
