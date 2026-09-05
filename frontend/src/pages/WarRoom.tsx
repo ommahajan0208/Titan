@@ -38,9 +38,9 @@ export default function WarRoom() {
   const ari = state.arms_race.value
   const ariPct = ((ari + 1) / 2) * 100  // map [-1,1] to [0,100]%
 
-  const regimeColor =
-    state.arms_race.regime === 'blue_ascendant' ? 'var(--good)' :
-    state.arms_race.regime === 'red_ascendant'  ? 'var(--attack)' : 'var(--warn)'
+  // Per design spec: ARI = large white number, regime in --ink-faint grey
+  // regimeColor used only for regime text label
+  const regimeLabel = state.arms_race.regime.replace(/_/g, ' ').toUpperCase()
 
   const lineData = generations.map(g => ({
     gen: g.generation,
@@ -157,9 +157,11 @@ export default function WarRoom() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="text-annotation" style={{ color: 'var(--ink-faint)', marginBottom: 4 }}>Arms Race Index</div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '3rem', fontWeight: 400, color: regimeColor, lineHeight: 1 }}>
+            {/* ARI number: always white per design spec */}
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '3rem', fontWeight: 400, color: 'var(--ink)', lineHeight: 1 }}>
               {ari > 0 ? '+' : ''}{ari.toFixed(3)}
             </div>
+            <div className="text-annotation" style={{ color: 'var(--ink-faint)', marginTop: 4 }}>{regimeLabel}</div>
           </div>
           <Badge variant={
             state.arms_race.regime === 'blue_ascendant' ? 'allow' :
@@ -171,16 +173,17 @@ export default function WarRoom() {
         <div className="ari-bar">
           <div className="ari-indicator" style={{ left: `${ariPct}%` }} />
         </div>
-        <div className="flex justify-between mt-2">
-          <span className="text-annotation" style={{ color: 'var(--attack)' }}>RED WINNING</span>
-          <span className="text-annotation" style={{ color: 'var(--good)' }}>BLUE WINNING</span>
-        </div>
+          {/* Labels: grey only, no color coding */}
+          <div className="ari-labels">
+            <span>RED WINNING</span>
+            <span>BLUE WINNING</span>
+          </div>
       </Card>
 
       {/* 3-column generation view */}
       <div className="grid grid-3 mb-6">
         <Card>
-          <div className="chart-title mb-4" style={{ color: 'var(--attack)' }}>Red Team</div>
+          <div className="chart-title mb-4">Red Team</div>
           <StatCard label="Population Size"   value={state.red.population_size}  tone="bad"  />
           <div style={{ marginTop: 'var(--space-3)' }}>
             <StatCard label="Composite Share" value={`${(state.red.composite_share * 100).toFixed(0)}%`} tone="warn" />

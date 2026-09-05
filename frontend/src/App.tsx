@@ -47,30 +47,29 @@ function buildKpiCells(kpi: DashboardData['kpis'], delta?: { ari: string; recall
       id: 'ari',
       label: 'Arms Race Index',
       value: kpi.arms_race_index.toFixed(3),
-      delta: delta?.ari ?? '+0.030',
-      tone: kpi.arms_race_regime === 'blue_ascendant' ? 'good'
-          : kpi.arms_race_regime === 'red_ascendant'  ? 'attack'
-          : 'warn',
+      // Regime as grey annotation - no per-cell color toning per design spec
+      delta: kpi.arms_race_regime?.replace('_', ' ').toUpperCase() ?? (delta?.ari ?? 'CONTESTED'),
+      tone: 'default',
     },
     {
       id: 'recall',
       label: 'Detection Recall',
       value: `${kpi.recall.toFixed(1)}%`,
       delta: delta?.recall ?? '+1.2%',
-      tone: 'good',
+      tone: 'default',
     },
     {
       id: 'fpr',
       label: 'False Positive Rate',
       value: `${kpi.fpr.toFixed(2)}%`,
       delta: delta?.fpr ?? '-0.02%',
-      tone: 'warn',
+      tone: 'default',
     },
     {
       id: 'model',
       label: 'Active Model',
       value: `Defense ${kpi.model_version}`,
-      tone: 'defense',
+      tone: 'default',
     },
   ]
 }

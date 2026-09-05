@@ -22,7 +22,7 @@ export function Badge({ variant = 'neutral', children, className = '', style }: 
             width: 6,
             height: 6,
             borderRadius: '50%',
-            background: 'var(--good)',
+            background: 'var(--spot)',
             animation: 'live-pulse 2s ease-in-out infinite',
           }}
         />

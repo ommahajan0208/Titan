@@ -14,12 +14,19 @@ import {
 } from 'recharts'
 import type { DashboardData } from '../types'
 
+// Chart color rules from design spec:
+// Bar charts: inactive=dark grey, secondary=medium grey, important=--ink-muted, selected=electric blue
+// Donut: dominant=electric blue, secondary=medium grey, tertiary=dark grey
 const FAMILY_COLORS: Record<string, string> = {
-  mule_network: '#ff3d6b', card_testing: '#ff9f0a', account_takeover: '#00d4ff',
-  synthetic_identity: '#a78bfa', cnp_social_engineering: '#34d399',
-  refund_abuse: '#f87171', promo_abuse: '#fb923c',
+  mule_network:          'var(--spot)',      // selected/dominant: electric blue
+  card_testing:          '#4B5563',          // secondary grey
+  account_takeover:      '#374151',          // medium grey
+  synthetic_identity:    '#1F2937',          // dark grey
+  cnp_social_engineering:'#374151',
+  refund_abuse:          '#1F2937',
+  promo_abuse:           '#1F2937',
 }
-const PIE_COLORS = ['#ff3d6b', '#ff9f0a', '#00d281']
+const PIE_COLORS = ['var(--defense)', '#374151', '#1A1F26']
 
 export default function Dashboard() {
   const setTab   = useAppStore(s => s.setActiveTab)
