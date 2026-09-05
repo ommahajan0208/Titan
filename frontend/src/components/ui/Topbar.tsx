@@ -1,6 +1,11 @@
 import { Play } from 'lucide-react'
 import { ModeToggle } from './ModeToggle'
+<<<<<<< HEAD
 import { KpiStrip, KpiCellData } from './KpiStrip'
+=======
+import { KpiStrip } from './KpiStrip'
+import type { KpiCellData } from './KpiStrip'
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
 import { Button } from './Button'
 import { Badge } from './Badge'
 

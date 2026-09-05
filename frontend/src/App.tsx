@@ -1,4 +1,5 @@
 import { useEffect, lazy, Suspense } from 'react'
+<<<<<<< HEAD
 import { Topbar } from './components/ui/Topbar'
 import { Sidebar } from './components/ui/Sidebar'
 import { LoadingState } from './components/ui/LoadingState'
@@ -6,6 +7,22 @@ import { useAppStore } from './stores/appStore'
 import type { NavId } from './types'
 import { MOCK_DASHBOARD } from './services/mockData'
 import type { KpiCellData } from './components/ui/KpiStrip'
+=======
+import React from 'react'
+import { Topbar } from './components/ui/Topbar'
+import { Sidebar } from './components/ui/Sidebar'
+import { LoadingState } from './components/ui/LoadingState'
+import { NotificationToast } from './components/ui/NotificationToast'
+import { JudgeDemoModal } from './modals/JudgeDemoModal'
+import { useAppStore } from './stores/appStore'
+import type { NavId } from './types'
+import { useMouseReticle } from './hooks/useMouseReticle'
+import { useApiData } from './hooks/useApiData'
+import { api } from './services/api'
+import { MOCK_DASHBOARD } from './services/mockData'
+import type { KpiCellData } from './components/ui/KpiStrip'
+import type { DashboardData } from './types'
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
 
 // Lazy-loaded pages
 const Dashboard    = lazy(() => import('./pages/Dashboard'))
@@ -34,6 +51,7 @@ const PAGE_MAP: Record<NavId, React.LazyExoticComponent<() => JSX.Element>> = {
   'docs':           Docs,
 }
 
+<<<<<<< HEAD
 import React from 'react'
 
 export default function App() {
@@ -57,6 +75,58 @@ export default function App() {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('mousemove', onMouseMove)
     }
+=======
+function buildKpiCells(kpi: DashboardData['kpis'], delta?: { ari: string; recall: string; fpr: string }): KpiCellData[] {
+  return [
+    {
+      id: 'ari',
+      label: 'Arms Race Index',
+      value: kpi.arms_race_index.toFixed(3),
+      // Regime as grey annotation - no per-cell color toning per design spec
+      delta: kpi.arms_race_regime?.replace('_', ' ').toUpperCase() ?? (delta?.ari ?? 'CONTESTED'),
+      tone: 'default',
+    },
+    {
+      id: 'recall',
+      label: 'Detection Recall',
+      value: `${kpi.recall.toFixed(1)}%`,
+      delta: delta?.recall ?? '+1.2%',
+      tone: 'default',
+    },
+    {
+      id: 'fpr',
+      label: 'False Positive Rate',
+      value: `${kpi.fpr.toFixed(2)}%`,
+      delta: delta?.fpr ?? '-0.02%',
+      tone: 'default',
+    },
+    {
+      id: 'model',
+      label: 'Active Model',
+      value: `Defense ${kpi.model_version}`,
+      tone: 'default',
+    },
+  ]
+}
+
+export default function App() {
+  const mode         = useAppStore(s => s.mode)
+  const setMode      = useAppStore(s => s.setMode)
+  const activeTab    = useAppStore(s => s.activeTab)
+  const setTab       = useAppStore(s => s.setActiveTab)
+  const setJudgeOpen = useAppStore(s => s.setJudgeDemoOpen)
+  const isDemoMode   = useAppStore(s => s.isDemoMode)
+
+  // Hook: mouse reticle (--mouse-x/y CSS vars)
+  useMouseReticle()
+
+  // Global scroll CSS variable writer
+  useEffect(() => {
+    const onScroll = () =>
+      document.documentElement.style.setProperty('--scroll-y', String(window.scrollY))
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
   }, [])
 
   // Apply mode class to <body> so --spot inverts everywhere
@@ -68,6 +138,7 @@ export default function App() {
     }
   }, [mode])
 
+<<<<<<< HEAD
   // KPI cells from mock data (Phase 7 will swap with live API)
   const kpi = MOCK_DASHBOARD.kpis
   const kpiCells: KpiCellData[] = [
@@ -101,6 +172,26 @@ export default function App() {
       tone: 'defense',
     },
   ]
+=======
+  // Live KPI data - falls back to mock data in demo mode or on API error
+  const { data: dashData } = useApiData<DashboardData>(
+    () => api.getDashboardData(),
+    [],
+    {
+      skip: isDemoMode,
+      fallback: MOCK_DASHBOARD,
+    }
+  )
+
+  const kpi = dashData?.kpis ?? MOCK_DASHBOARD.kpis
+  const kpiCells = buildKpiCells(kpi)
+
+  // Sidebar metrics
+  const recall = kpi.recall ?? 92.8
+  const fpr = kpi.fpr ?? 1.0
+  const modelVersion = kpi.model_version ?? 'v3.0'
+  const isLive = !isDemoMode
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
 
   const PageComponent = PAGE_MAP[activeTab]
 
@@ -118,7 +209,11 @@ export default function App() {
         onModeChange={setMode}
         onJudgeDemo={() => setJudgeOpen(true)}
         kpiCells={kpiCells}
+<<<<<<< HEAD
         isLive={false}
+=======
+        isLive={isLive}
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
       />
 
       {/* Body: sidebar + main content */}
@@ -127,10 +222,17 @@ export default function App() {
           <Sidebar
             active={activeTab}
             onNavigate={(id) => setTab(id)}
+<<<<<<< HEAD
             modelVersion="v3.0"
             recall={92.8}
             fpr={1.0}
             isLive={false}
+=======
+            modelVersion={modelVersion}
+            recall={recall}
+            fpr={fpr}
+            isLive={isLive}
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
           />
         </aside>
 
@@ -140,6 +242,13 @@ export default function App() {
           </Suspense>
         </main>
       </div>
+<<<<<<< HEAD
+=======
+
+      {/* Global overlays */}
+      <JudgeDemoModal />
+      <NotificationToast />
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
     </div>
   )
 }
