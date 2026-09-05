@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 
 type Tone = 'good' | 'bad' | 'warn' | 'default' | 'spot' | 'muted'
 
@@ -17,9 +17,10 @@ interface StatCardProps {
   sub?: string
   tone?: Tone
   className?: string
+  style?: React.CSSProperties
 }
 
-export function StatCard({ label, value, sub, tone = 'default', className = '' }: StatCardProps) {
+export function StatCard({ label, value, sub, tone = 'default', className = '', style }: StatCardProps) {
   const valueRef = useRef<HTMLDivElement>(null)
   const prevValue = useRef(value)
 
@@ -34,7 +35,7 @@ export function StatCard({ label, value, sub, tone = 'default', className = '' }
   }, [value])
 
   return (
-    <div className={`stat-card ${className}`.trim()}>
+    <div className={`stat-card ${className}`.trim()} style={style}>
       <div className="stat-card-label">{label}</div>
       <div
         ref={valueRef}

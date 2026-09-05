@@ -5,10 +5,10 @@ import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { MOCK_WAR_ROOM_STATE, MOCK_GENERATIONS } from '../services/mockData'
-import { Play, Square, RefreshCw } from 'lucide-react'
+import { Play, Square } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, ReferenceLine, ScatterChart, Scatter, ZAxis,
+  CartesianGrid, ReferenceLine,
 } from 'recharts'
 
 type RunStatus = 'idle' | 'running' | 'completed'
