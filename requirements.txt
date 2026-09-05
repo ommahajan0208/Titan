@@ -1,0 +1,31 @@
+# Titan Backend - Requirements
+# Pinned for reproducibility
+
+# Web framework
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+
+# Validation + settings
+pydantic==2.9.2
+pydantic-settings==2.5.2
+
+# ML stack
+xgboost==2.1.1
+lightgbm==4.5.0
+scikit-learn==1.5.2
+shap==0.46.0
+
+# Data
+numpy==1.26.4
+pandas==2.2.3
+networkx==3.3
+
+# ONNX runtime (ArcFace KYC)
+onnxruntime==1.19.2
+
+# File uploads
+python-multipart==0.0.12
+
+# Testing
+pytest==8.3.3
+httpx==0.27.2
