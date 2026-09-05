@@ -1,22 +1,39 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { MOCK_WAR_ROOM_STATE, MOCK_GENERATIONS } from '../services/mockData'
-import { Play, Square } from 'lucide-react'
+import { useWarRoom } from '../hooks/useWarRoom'
+import { useAppStore } from '../stores/appStore'
+import { adaptiveApi } from '../services/adaptiveApi'
+import { Play, Square, Loader2 } from 'lucide-react'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine,
 } from 'recharts'
 
-type RunStatus = 'idle' | 'running' | 'completed'
+type RunStatus = 'idle' | 'starting' | 'running' | 'completed'
 
 export default function WarRoom() {
   const [status, setStatus] = useState<RunStatus>('completed')
-  const state = MOCK_WAR_ROOM_STATE
-  const generations = MOCK_GENERATIONS
+  const [mode, setMode] = useState<'fast' | 'thorough' | 'stealth'>('fast')
+  const [seed] = useState(42)
+  const [startError, setStartError] = useState<string | null>(null)
+
+  const isDemoMode  = useAppStore(s => s.isDemoMode)
+  const activeRunId = useAppStore(s => s.activeRunId)
+  const setRunId    = useAppStore(s => s.setActiveRunId)
+  const addNotification = useAppStore(s => s.addNotification)
+
+  // Live polling when a run is active and NOT in demo mode
+  const { state: liveState, generations: liveGenerations, oracle, polling, error: pollError } =
+    useWarRoom(isDemoMode ? null : activeRunId)
+
+  // Use live data when available, else mock
+  const state = (liveState ?? MOCK_WAR_ROOM_STATE)
+  const generations = (liveGenerations.length > 0 ? liveGenerations : MOCK_GENERATIONS)
 
   const ari = state.arms_race.value
   const ariPct = ((ari + 1) / 2) * 100  // map [-1,1] to [0,100]%
@@ -31,6 +48,54 @@ export default function WarRoom() {
     novel: +(g.detection_rate_new_vectors * 100).toFixed(1),
   }))
 
+  const handleStart = useCallback(async () => {
+    if (isDemoMode) {
+      setStatus('running')
+      addNotification({ type: 'info', message: 'Demo mode: showing mock War Room data.' })
+      return
+    }
+    setStatus('starting')
+    setStartError(null)
+    try {
+      const { run_id } = await adaptiveApi.startRun({ seed, generations: 10, mode })
+      setRunId(run_id)
+      setStatus('running')
+      addNotification({ type: 'success', message: `War Room run started (ID: ${run_id.slice(0, 8)})` })
+    } catch (err) {
+      setStartError((err as Error).message)
+      setStatus('idle')
+      addNotification({ type: 'error', message: `Failed to start run: ${(err as Error).message}` })
+    }
+  }, [isDemoMode, seed, mode, setRunId, addNotification])
+
+  const handleStop = useCallback(async () => {
+    if (activeRunId && !isDemoMode) {
+      try {
+        await adaptiveApi.stopRun(activeRunId)
+        addNotification({ type: 'info', message: 'War Room run stopped.' })
+      } catch { /* ignore stop errors */ }
+    }
+    setRunId(null)
+    setStatus('idle')
+  }, [activeRunId, isDemoMode, setRunId, addNotification])
+
+  // Update status to reflect live poll state
+  React.useEffect(() => {
+    if (polling && status !== 'running') setStatus('running')
+  }, [polling, status])
+
+  // Detect completion
+  React.useEffect(() => {
+    if (liveState && liveGenerations.length > 0 && liveGenerations.length >= liveState.n_generations) {
+      setStatus('completed')
+      setRunId(null)
+    }
+  }, [liveState, liveGenerations, setRunId])
+
+  const displayStatus: RunStatus = polling ? 'running'
+    : status === 'starting' ? 'starting'
+    : status
+
   return (
     <div className="page">
       <div className="page-header">
@@ -42,31 +107,49 @@ export default function WarRoom() {
       <Card className="mb-6">
         <div className="flex items-center gap-4" style={{ flexWrap: 'wrap' }}>
           <div className="flex gap-3">
-            {status === 'running' ? (
-              <Button variant="danger" icon={<Square size={14} />} onClick={() => setStatus('idle')}>
+            {displayStatus === 'running' || displayStatus === 'starting' ? (
+              <Button variant="danger" icon={<Square size={14} />} onClick={handleStop}
+                loading={displayStatus === 'starting'}>
                 Stop Run
               </Button>
             ) : (
-              <Button variant="primary" icon={<Play size={14} />} onClick={() => setStatus('running')}>
+              <Button variant="primary" icon={<Play size={14} />} onClick={handleStart}>
                 Start Run
               </Button>
             )}
-            <select id="war-mode" className="select">
+            <select
+              id="war-mode"
+              className="select"
+              value={mode}
+              onChange={e => setMode(e.target.value as typeof mode)}
+              disabled={displayStatus === 'running'}
+            >
               <option value="fast">Mode: fast</option>
-              <option value="standard">Mode: standard</option>
-              <option value="debug">Mode: debug</option>
+              <option value="thorough">Mode: thorough</option>
+              <option value="stealth">Mode: stealth</option>
             </select>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ink-muted)' }}>
-              Seed: <code style={{ color: 'var(--spot)' }}>42</code>
+              Seed: <code style={{ color: 'var(--spot)' }}>{seed}</code>
             </div>
           </div>
 
-          <div style={{ marginLeft: 'auto' }}>
-            <Badge variant={status === 'running' ? 'live' : status === 'completed' ? 'allow' : 'neutral'}>
-              {status.toUpperCase()}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {polling && (
+              <Loader2 size={13} style={{ color: 'var(--spot)', animation: 'spin 1s linear infinite' }} />
+            )}
+            <Badge variant={
+              displayStatus === 'running' || displayStatus === 'starting' ? 'live'
+              : displayStatus === 'completed' ? 'allow' : 'neutral'
+            }>
+              {displayStatus.toUpperCase()}
             </Badge>
           </div>
         </div>
+        {(startError || pollError) && (
+          <div style={{ marginTop: 10, fontSize: '0.8125rem', color: 'var(--attack)', fontFamily: 'var(--font-mono)' }}>
+            {startError ?? pollError}
+          </div>
+        )}
       </Card>
 
       {/* Arms Race Index */}
@@ -158,7 +241,7 @@ export default function WarRoom() {
       </div>
 
       {/* Detection rate evolution */}
-      <Card>
+      <Card className="mb-6">
         <div className="chart-title mb-4">Detection Rate - Fixed Set vs New Vectors</div>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={lineData}>
@@ -172,6 +255,26 @@ export default function WarRoom() {
           </LineChart>
         </ResponsiveContainer>
       </Card>
+
+      {/* Oracle findings (shown after run complete) */}
+      {oracle && (
+        <Card style={{ borderColor: 'var(--good)' }}>
+          <div className="chart-title mb-3" style={{ color: 'var(--good)' }}>Oracle Findings</div>
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-annotation" style={{ color: 'var(--ink-faint)' }}>Regime</span>
+            <Badge variant="allow">{oracle.regime.replace(/_/g, ' ').toUpperCase()}</Badge>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 'var(--space-4)' }}>
+            {oracle.findings.map(f => (
+              <div key={f.key} style={{ padding: 'var(--space-3)', background: 'var(--bg-raised)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--spot)', marginBottom: 4 }}>{f.key}</div>
+                <div style={{ fontSize: '0.875rem', color: 'var(--ink-muted)' }}>{f.detail}</div>
+              </div>
+            ))}
+          </div>
+          <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)', lineHeight: 1.6 }}>{oracle.summary}</p>
+        </Card>
+      )}
     </div>
   )
 }
