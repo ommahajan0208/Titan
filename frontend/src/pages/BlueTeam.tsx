@@ -1,21 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { MOCK_MODELS } from '../services/mockData'
-import { CheckCircle, XCircle, TrendingUp } from 'lucide-react'
+import { CheckCircle, XCircle, TrendingUp, Settings } from 'lucide-react'
+import { PolicyEditor } from '../modals/PolicyEditor'
+import type { DefensePolicy } from '../types'
 
 const GATES = [
   { id: 'g1', label: 'Recall delta > 0.005', pass: true },
   { id: 'g2', label: 'FPR regression < 0.002', pass: true },
-  { id: 'g3', label: 'Provenance guard (AUC ≈ 0.5)', pass: true },
-  { id: 'g4', label: 'Fidelity score ≥ 80.0', pass: true },
+  { id: 'g3', label: 'Provenance guard (AUC approx 0.5)', pass: true },
+  { id: 'g4', label: 'Fidelity score >= 80.0', pass: true },
 ]
+
+const INITIAL_POLICY: DefensePolicy = {
+  ml_threshold: 0.62,
+  graph_weight: 0.25,
+  fpr_target: 0.01,
+  trust_region: 0.05,
+  adaptation_rate: 0.0023,
+}
 
 export default function BlueTeam() {
   const models = MOCK_MODELS
   const active = models.find(m => m.is_active)!
+  const [policy, setPolicy] = useState<DefensePolicy>(INITIAL_POLICY)
+  const [policyEditorOpen, setPolicyEditorOpen] = useState(false)
 
   return (
     <div className="page">
@@ -92,27 +104,49 @@ export default function BlueTeam() {
 
         {/* Policy panel */}
         <Card>
-          <div className="chart-title mb-4">Defense Policy</div>
+          <div className="flex items-center justify-between mb-4">
+            <div className="chart-title" style={{ margin: 0 }}>Defense Policy</div>
+            <Button
+              id="blue-team-edit-policy"
+              variant="ghost"
+              size="sm"
+              icon={<Settings size={12} />}
+              onClick={() => setPolicyEditorOpen(true)}
+            >
+              Edit Policy
+            </Button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-            {[
-              { id: 'ml-threshold', label: 'ML Threshold', value: 0.62, min: 0, max: 1, step: 0.01, format: (v: number) => v.toFixed(2) },
-              { id: 'fpr-budget', label: 'FPR Budget', value: 0.01, min: 0.001, max: 0.05, step: 0.001, format: (v: number) => `${(v * 100).toFixed(1)}%` },
-              { id: 'graph-weight', label: 'Graph Weight', value: 0.25, min: 0, max: 1, step: 0.01, format: (v: number) => v.toFixed(2) },
-            ].map(field => (
-              <div key={field.id}>
+            {([
+              { label: 'ML Threshold',    value: policy.ml_threshold,    format: (v: number) => v.toFixed(2) },
+              { label: 'FPR Budget',      value: policy.fpr_target,       format: (v: number) => `${(v * 100).toFixed(1)}%` },
+              { label: 'Graph Weight',    value: policy.graph_weight,     format: (v: number) => v.toFixed(2) },
+              { label: 'Trust Region',    value: policy.trust_region,     format: (v: number) => v.toFixed(3) },
+              { label: 'Adaptation Rate', value: policy.adaptation_rate,  format: (v: number) => v.toFixed(4) },
+            ] as const).map(field => (
+              <div key={field.label}>
                 <div className="flex justify-between mb-2">
-                  <label className="text-annotation" style={{ color: 'var(--ink-faint)' }}>{field.label}</label>
+                  <span className="text-annotation" style={{ color: 'var(--ink-faint)' }}>{field.label}</span>
                   <span className="text-mono text-small" style={{ color: 'var(--spot)' }}>{field.format(field.value)}</span>
                 </div>
-                <input id={field.id} type="range" className="slider" min={field.min} max={field.max} step={field.step} defaultValue={field.value} />
+                <ProgressBar value={field.value} variant="defense" />
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 'var(--space-5)' }}>
-            <Button variant="ghost">Edit Policy</Button>
-          </div>
         </Card>
       </div>
+
+      {/* PolicyEditor modal */}
+      {policyEditorOpen && (
+        <PolicyEditor
+          policy={policy}
+          onClose={() => setPolicyEditorOpen(false)}
+          onSave={(updated) => {
+            setPolicy(updated)
+            setPolicyEditorOpen(false)
+          }}
+        />
+      )}
     </div>
   )
 }

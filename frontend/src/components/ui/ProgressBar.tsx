@@ -1,3 +1,5 @@
+import React from 'react'
+
 interface ProgressBarProps {
   value: number          // 0..1
   variant?: 'attack' | 'defense' | 'spot' | 'shimmer'
@@ -5,6 +7,7 @@ interface ProgressBarProps {
   label?: string
   showPercent?: boolean
   className?: string
+  style?: React.CSSProperties
 }
 
 export function ProgressBar({
@@ -14,11 +17,12 @@ export function ProgressBar({
   label,
   showPercent = false,
   className = '',
+  style,
 }: ProgressBarProps) {
   const pct = Math.min(100, Math.max(0, value * 100))
 
   return (
-    <div className={className}>
+    <div className={className} style={style}>
       {(label || showPercent) && (
         <div
           style={{

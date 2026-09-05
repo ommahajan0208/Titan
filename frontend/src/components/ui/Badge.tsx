@@ -1,3 +1,5 @@
+import React from 'react'
+
 type BadgeVariant =
   | 'block' | 'allow' | 'review'
   | 'critical' | 'high' | 'medium' | 'low'
@@ -7,13 +9,12 @@ interface BadgeProps {
   variant?: BadgeVariant
   children: React.ReactNode
   className?: string
+  style?: React.CSSProperties
 }
 
-import React from 'react'
-
-export function Badge({ variant = 'neutral', children, className = '' }: BadgeProps) {
+export function Badge({ variant = 'neutral', children, className = '', style }: BadgeProps) {
   return (
-    <span className={`badge badge-${variant} ${className}`.trim()}>
+    <span className={`badge badge-${variant} ${className}`.trim()} style={style}>
       {variant === 'live' && (
         <span
           style={{
@@ -21,7 +22,7 @@ export function Badge({ variant = 'neutral', children, className = '' }: BadgePr
             width: 6,
             height: 6,
             borderRadius: '50%',
-            background: 'var(--good)',
+            background: 'var(--spot)',
             animation: 'live-pulse 2s ease-in-out infinite',
           }}
         />

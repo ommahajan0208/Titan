@@ -1,3 +1,4 @@
+import React from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge, DecisionBadge } from '../components/ui/Badge'
@@ -5,32 +6,52 @@ import { Button } from '../components/ui/Button'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { useAppStore } from '../stores/appStore'
 import { MOCK_DASHBOARD } from '../services/mockData'
+import { useApiData } from '../hooks/useApiData'
+import { api } from '../services/api'
 import { Play, RefreshCw, Swords } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from 'recharts'
+import type { DashboardData } from '../types'
 
+// Chart color rules from design spec:
+// Bar charts: inactive=dark grey, secondary=medium grey, important=--ink-muted, selected=electric blue
+// Donut: dominant=electric blue, secondary=medium grey, tertiary=dark grey
 const FAMILY_COLORS: Record<string, string> = {
-  mule_network: '#ff3d6b', card_testing: '#ff9f0a', account_takeover: '#00d4ff',
-  synthetic_identity: '#a78bfa', cnp_social_engineering: '#34d399',
-  refund_abuse: '#f87171', promo_abuse: '#fb923c',
+  mule_network:          'var(--spot)',      // selected/dominant: electric blue
+  card_testing:          '#4B5563',          // secondary grey
+  account_takeover:      '#374151',          // medium grey
+  synthetic_identity:    '#1F2937',          // dark grey
+  cnp_social_engineering:'#374151',
+  refund_abuse:          '#1F2937',
+  promo_abuse:           '#1F2937',
 }
-const PIE_COLORS = ['#ff3d6b', '#ff9f0a', '#00d281']
+const PIE_COLORS = ['var(--defense)', '#374151', '#1A1F26']
 
 export default function Dashboard() {
-  const setTab = useAppStore(s => s.setActiveTab)
+  const setTab   = useAppStore(s => s.setActiveTab)
   const setJudge = useAppStore(s => s.setJudgeDemoOpen)
-  const data = MOCK_DASHBOARD
+  const isDemoMode = useAppStore(s => s.isDemoMode)
 
-  const familyData = Object.entries(data.attack_families).map(([name, value]) => ({
+  const { data, loading, refetch } = useApiData<DashboardData>(
+    () => api.getDashboardData(),
+    [],
+    { skip: isDemoMode, fallback: MOCK_DASHBOARD }
+  )
+
+  const d = data ?? MOCK_DASHBOARD
+
+  const familyData = Object.entries(d.attack_families).map(([name, value]) => ({
     name: name.replace(/_/g, ' '), value, fill: FAMILY_COLORS[name] ?? '#8b949e'
   }))
 
   const pieData = [
-    { name: 'BLOCK', value: data.decision_split.block },
-    { name: 'REVIEW', value: data.decision_split.review },
-    { name: 'ALLOW',  value: data.decision_split.allow },
+    { name: 'BLOCK', value: d.decision_split.block },
+    { name: 'REVIEW', value: d.decision_split.review },
+    { name: 'ALLOW',  value: d.decision_split.allow },
   ]
+
+  const kpi = d.kpis
 
   return (
     <div className="page">
@@ -45,10 +66,34 @@ export default function Dashboard() {
 
       {/* KPI stat cards */}
       <div className="grid grid-4 mb-6 stagger" style={{ '--p': 1 } as React.CSSProperties}>
-        <StatCard label="Arms Race Index"    value="0.142"   sub="blue_ascendant"   tone="good"    style={{ '--i': 0 } as React.CSSProperties} />
-        <StatCard label="Detection Recall"   value="92.8%"   sub="+1.2% vs v2.0"   tone="good"    style={{ '--i': 1 } as React.CSSProperties} />
-        <StatCard label="False Positive Rate" value="1.00%" sub="@ 1% FPR budget"   tone="warn"    style={{ '--i': 2 } as React.CSSProperties} />
-        <StatCard label="Active Model"       value="v3.0"    sub="Defense hardened" tone="default" style={{ '--i': 3 } as React.CSSProperties} />
+        <StatCard
+          label="Arms Race Index"
+          value={kpi.arms_race_index.toFixed(3)}
+          sub={kpi.arms_race_regime}
+          tone={kpi.arms_race_regime === 'blue_ascendant' ? 'good' : kpi.arms_race_regime === 'red_ascendant' ? 'bad' : 'warn'}
+          style={{ '--i': 0 } as React.CSSProperties}
+        />
+        <StatCard
+          label="Detection Recall"
+          value={`${kpi.recall.toFixed(1)}%`}
+          sub="+1.2% vs v2.0"
+          tone="good"
+          style={{ '--i': 1 } as React.CSSProperties}
+        />
+        <StatCard
+          label="False Positive Rate"
+          value={`${kpi.fpr.toFixed(2)}%`}
+          sub="@ 1% FPR budget"
+          tone="warn"
+          style={{ '--i': 2 } as React.CSSProperties}
+        />
+        <StatCard
+          label="Active Model"
+          value={kpi.model_version}
+          sub="Defense hardened"
+          tone="default"
+          style={{ '--i': 3 } as React.CSSProperties}
+        />
       </div>
 
       {/* Main grid */}
@@ -114,7 +159,13 @@ export default function Dashboard() {
         <div style={{ padding: 'var(--space-5) var(--space-6) var(--space-4)' }}>
           <div className="flex items-center justify-between">
             <div className="chart-title" style={{ margin: 0 }}>Recent Scenarios</div>
-            <Button variant="ghost" size="sm" icon={<RefreshCw size={12} />}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon={<RefreshCw size={12} className={loading ? 'spin' : ''} />}
+              onClick={refetch}
+              disabled={loading}
+            >
               Refresh
             </Button>
           </div>
@@ -132,7 +183,7 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.recent_scenarios.map(s => (
+              {d.recent_scenarios.map(s => (
                 <tr key={s.id} className={s.evaded_detection ? 'row-attack-evaded' : ''}>
                   <td>
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: FAMILY_COLORS[s.attack_family] ?? 'var(--ink-muted)' }}>
@@ -193,5 +244,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
-import React from 'react'
