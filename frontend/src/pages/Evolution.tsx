@@ -2,6 +2,13 @@ import React from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+import { MOCK_GENERATIONS } from '../services/mockData'
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 
 const ROUNDS = [

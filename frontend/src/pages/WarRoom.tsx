@@ -1,14 +1,27 @@
+<<<<<<< HEAD
 import React, { useState, useCallback } from 'react'
+=======
+<<<<<<< HEAD
+import React, { useState } from 'react'
+=======
+import React, { useState, useCallback } from 'react'
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { MOCK_WAR_ROOM_STATE, MOCK_GENERATIONS } from '../services/mockData'
+<<<<<<< HEAD
 import { useWarRoom } from '../hooks/useWarRoom'
 import { useAppStore } from '../stores/appStore'
 import { adaptiveApi } from '../services/adaptiveApi'
 import { Play, Square, Loader2 } from 'lucide-react'
+=======
+<<<<<<< HEAD
+import { Play, Square, RefreshCw } from 'lucide-react'
+>>>>>>> origin/main
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, ReferenceLine,
@@ -54,10 +67,32 @@ type RunStatus = 'idle' | 'starting' | 'running' | 'completed'
 
 export default function WarRoom() {
   const [status, setStatus] = useState<RunStatus>('completed')
+<<<<<<< HEAD
   const [mode, setMode] = useState<'fast' | 'thorough' | 'stealth'>('fast')
   const [seed] = useState(42)
   const [startError, setStartError] = useState<string | null>(null)
   const [inspectedGenome, setInspectedGenome] = useState<AttackGenome | null>(null)
+=======
+  const state = MOCK_WAR_ROOM_STATE
+  const generations = MOCK_GENERATIONS
+=======
+import { useWarRoom } from '../hooks/useWarRoom'
+import { useAppStore } from '../stores/appStore'
+import { adaptiveApi } from '../services/adaptiveApi'
+import { Play, Square, Loader2 } from 'lucide-react'
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  CartesianGrid, ReferenceLine,
+} from 'recharts'
+
+type RunStatus = 'idle' | 'starting' | 'running' | 'completed'
+
+export default function WarRoom() {
+  const [status, setStatus] = useState<RunStatus>('completed')
+  const [mode, setMode] = useState<'fast' | 'thorough' | 'stealth'>('fast')
+  const [seed] = useState(42)
+  const [startError, setStartError] = useState<string | null>(null)
+>>>>>>> origin/main
 
   const isDemoMode  = useAppStore(s => s.isDemoMode)
   const activeRunId = useAppStore(s => s.activeRunId)
@@ -71,13 +106,29 @@ export default function WarRoom() {
   // Use live data when available, else mock
   const state = (liveState ?? MOCK_WAR_ROOM_STATE)
   const generations = (liveGenerations.length > 0 ? liveGenerations : MOCK_GENERATIONS)
+<<<<<<< HEAD
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 
   const ari = state.arms_race.value
   const ariPct = ((ari + 1) / 2) * 100  // map [-1,1] to [0,100]%
 
+<<<<<<< HEAD
   // Per design spec: ARI = large white number, regime in --ink-faint grey
   // regimeColor used only for regime text label
   const regimeLabel = state.arms_race.regime.replace(/_/g, ' ').toUpperCase()
+=======
+<<<<<<< HEAD
+  const regimeColor =
+    state.arms_race.regime === 'blue_ascendant' ? 'var(--good)' :
+    state.arms_race.regime === 'red_ascendant'  ? 'var(--attack)' : 'var(--warn)'
+=======
+  // Per design spec: ARI = large white number, regime in --ink-faint grey
+  // regimeColor used only for regime text label
+  const regimeLabel = state.arms_race.regime.replace(/_/g, ' ').toUpperCase()
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 
   const lineData = generations.map(g => ({
     gen: g.generation,
@@ -85,6 +136,11 @@ export default function WarRoom() {
     novel: +(g.detection_rate_new_vectors * 100).toFixed(1),
   }))
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> origin/main
   const handleStart = useCallback(async () => {
     if (isDemoMode) {
       setStatus('running')
@@ -133,6 +189,10 @@ export default function WarRoom() {
     : status === 'starting' ? 'starting'
     : status
 
+<<<<<<< HEAD
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
   return (
     <div className="page">
       <div className="page-header">
@@ -144,6 +204,53 @@ export default function WarRoom() {
       <Card className="mb-6">
         <div className="flex items-center gap-4" style={{ flexWrap: 'wrap' }}>
           <div className="flex gap-3">
+<<<<<<< HEAD
+            {displayStatus === 'running' || displayStatus === 'starting' ? (
+              <Button variant="danger" icon={<Square size={14} />} onClick={handleStop}
+                loading={displayStatus === 'starting'}>
+=======
+<<<<<<< HEAD
+            {status === 'running' ? (
+              <Button variant="danger" icon={<Square size={14} />} onClick={() => setStatus('idle')}>
+>>>>>>> origin/main
+                Stop Run
+              </Button>
+            ) : (
+              <Button variant="primary" icon={<Play size={14} />} onClick={handleStart}>
+                Start Run
+              </Button>
+            )}
+            <select
+              id="war-mode"
+              className="select"
+              value={mode}
+              onChange={e => setMode(e.target.value as typeof mode)}
+              disabled={displayStatus === 'running'}
+            >
+              <option value="fast">Mode: fast</option>
+              <option value="thorough">Mode: thorough</option>
+              <option value="stealth">Mode: stealth</option>
+            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--ink-muted)' }}>
+              Seed: <code style={{ color: 'var(--spot)' }}>{seed}</code>
+            </div>
+          </div>
+
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {polling && (
+              <Loader2 size={13} style={{ color: 'var(--spot)', animation: 'spin 1s linear infinite' }} />
+            )}
+            <Badge variant={
+              displayStatus === 'running' || displayStatus === 'starting' ? 'live'
+              : displayStatus === 'completed' ? 'allow' : 'neutral'
+            }>
+              {displayStatus.toUpperCase()}
+            </Badge>
+          </div>
+        </div>
+<<<<<<< HEAD
+=======
+=======
             {displayStatus === 'running' || displayStatus === 'starting' ? (
               <Button variant="danger" icon={<Square size={14} />} onClick={handleStop}
                 loading={displayStatus === 'starting'}>
@@ -182,11 +289,16 @@ export default function WarRoom() {
             </Badge>
           </div>
         </div>
+>>>>>>> origin/main
         {(startError || pollError) && (
           <div style={{ marginTop: 10, fontSize: '0.8125rem', color: 'var(--attack)', fontFamily: 'var(--font-mono)' }}>
             {startError ?? pollError}
           </div>
         )}
+<<<<<<< HEAD
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
       </Card>
 
       {/* Arms Race Index */}
@@ -194,11 +306,25 @@ export default function WarRoom() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <div className="text-annotation" style={{ color: 'var(--ink-faint)', marginBottom: 4 }}>Arms Race Index</div>
+<<<<<<< HEAD
             {/* ARI number: always white per design spec */}
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '3rem', fontWeight: 400, color: 'var(--ink)', lineHeight: 1 }}>
               {ari > 0 ? '+' : ''}{ari.toFixed(3)}
             </div>
             <div className="text-annotation" style={{ color: 'var(--ink-faint)', marginTop: 4 }}>{regimeLabel}</div>
+=======
+<<<<<<< HEAD
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '3rem', fontWeight: 400, color: regimeColor, lineHeight: 1 }}>
+              {ari > 0 ? '+' : ''}{ari.toFixed(3)}
+            </div>
+=======
+            {/* ARI number: always white per design spec */}
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '3rem', fontWeight: 400, color: 'var(--ink)', lineHeight: 1 }}>
+              {ari > 0 ? '+' : ''}{ari.toFixed(3)}
+            </div>
+            <div className="text-annotation" style={{ color: 'var(--ink-faint)', marginTop: 4 }}>{regimeLabel}</div>
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
           </div>
           <Badge variant={
             state.arms_race.regime === 'blue_ascendant' ? 'allow' :
@@ -210,17 +336,38 @@ export default function WarRoom() {
         <div className="ari-bar">
           <div className="ari-indicator" style={{ left: `${ariPct}%` }} />
         </div>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+        <div className="flex justify-between mt-2">
+          <span className="text-annotation" style={{ color: 'var(--attack)' }}>RED WINNING</span>
+          <span className="text-annotation" style={{ color: 'var(--good)' }}>BLUE WINNING</span>
+        </div>
+=======
+>>>>>>> origin/main
           {/* Labels: grey only, no color coding */}
           <div className="ari-labels">
             <span>RED WINNING</span>
             <span>BLUE WINNING</span>
           </div>
+<<<<<<< HEAD
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
       </Card>
 
       {/* 3-column generation view */}
       <div className="grid grid-3 mb-6">
         <Card>
+<<<<<<< HEAD
           <div className="chart-title mb-4">Red Team</div>
+=======
+<<<<<<< HEAD
+          <div className="chart-title mb-4" style={{ color: 'var(--attack)' }}>Red Team</div>
+=======
+          <div className="chart-title mb-4">Red Team</div>
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
           <StatCard label="Population Size"   value={state.red.population_size}  tone="bad"  />
           <div style={{ marginTop: 'var(--space-3)' }}>
             <StatCard label="Composite Share" value={`${(state.red.composite_share * 100).toFixed(0)}%`} tone="warn" />
@@ -281,7 +428,15 @@ export default function WarRoom() {
       </div>
 
       {/* Detection rate evolution */}
+<<<<<<< HEAD
       <Card className="mb-6">
+=======
+<<<<<<< HEAD
+      <Card>
+=======
+      <Card className="mb-6">
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
         <div className="chart-title mb-4">Detection Rate - Fixed Set vs New Vectors</div>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={lineData}>
@@ -295,6 +450,7 @@ export default function WarRoom() {
           </LineChart>
         </ResponsiveContainer>
       </Card>
+<<<<<<< HEAD
 
       {/* Red Strategy Library */}
       <Card className="mb-6">
@@ -333,6 +489,10 @@ export default function WarRoom() {
         </div>
         <p style={{ marginTop: 12, fontSize: '0.75rem', color: 'var(--ink-faint)', fontStyle: 'italic' }}>Click any genome to inspect traits, lineage, and operator log.</p>
       </Card>
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> origin/main
 
       {/* Oracle findings (shown after run complete) */}
       {oracle && (
@@ -353,12 +513,16 @@ export default function WarRoom() {
           <p style={{ fontSize: '0.875rem', color: 'var(--ink-muted)', lineHeight: 1.6 }}>{oracle.summary}</p>
         </Card>
       )}
+<<<<<<< HEAD
 
       {/* Genome Inspector drawer */}
       <GenomeInspector
         genome={inspectedGenome}
         onClose={() => setInspectedGenome(null)}
       />
+=======
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
     </div>
   )
 }

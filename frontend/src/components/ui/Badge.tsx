@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 import React from 'react'
 
+=======
+<<<<<<< HEAD
+=======
+import React from 'react'
+
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 type BadgeVariant =
   | 'block' | 'allow' | 'review'
   | 'critical' | 'high' | 'medium' | 'low'
@@ -9,12 +17,28 @@ interface BadgeProps {
   variant?: BadgeVariant
   children: React.ReactNode
   className?: string
+<<<<<<< HEAD
+  style?: React.CSSProperties
+=======
+<<<<<<< HEAD
+>>>>>>> origin/main
+}
+
+export function Badge({ variant = 'neutral', children, className = '', style }: BadgeProps) {
+  return (
+<<<<<<< HEAD
+    <span className={`badge badge-${variant} ${className}`.trim()} style={style}>
+=======
+    <span className={`badge badge-${variant} ${className}`.trim()}>
+=======
   style?: React.CSSProperties
 }
 
 export function Badge({ variant = 'neutral', children, className = '', style }: BadgeProps) {
   return (
     <span className={`badge badge-${variant} ${className}`.trim()} style={style}>
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
       {variant === 'live' && (
         <span
           style={{
@@ -22,7 +46,15 @@ export function Badge({ variant = 'neutral', children, className = '', style }: 
             width: 6,
             height: 6,
             borderRadius: '50%',
+<<<<<<< HEAD
             background: 'var(--spot)',
+=======
+<<<<<<< HEAD
+            background: 'var(--good)',
+=======
+            background: 'var(--spot)',
+>>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
             animation: 'live-pulse 2s ease-in-out infinite',
           }}
         />
