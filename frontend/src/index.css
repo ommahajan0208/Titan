@@ -2,50 +2,57 @@
    PROJECT TITAN - GLOBAL DESIGN SYSTEM
    Derived from design.md - the canonical visual reference.
    All components read from semantic tokens, never from raw hex.
+   Visual identity: Classified AI Defense Laboratory
+   Color law: 80% black/graphite, 17% white/grey, 3% electric blue.
    ============================================================ */
 
 /* ---- 1. CSS CUSTOM PROPERTIES (TOKENS) ---- */
 :root {
-  /* Backgrounds */
-  --bg-void:    #0a0d14;
-  --bg-surface: #111827;
-  --bg-raised:  #1a2236;
-  --bg-glass:   rgba(17, 24, 39, 0.72);
+  /* Backgrounds - deep black, almost no blue tint */
+  --bg-void:    #050607;
+  --bg-surface: #080A0D;
+  --bg-raised:  #0D1014;
+  --bg-glass:   rgba(8, 10, 13, 0.80);
 
-  /* Typography */
+  /* Typography - white/grey hierarchy only */
   --ink:        #f0f2f5;
   --ink-muted:  #8b949e;
   --ink-faint:  #4b5563;
 
-  /* Structure */
-  --border:        rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --rule:          rgba(255, 255, 255, 0.055);
+  /* Structure - very tight, almost invisible */
+  --border:        rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --rule:          rgba(255, 255, 255, 0.04);
 
-  /* Blue Team (Defender) */
-  --defense:      #00d4ff;
-  --defense-soft: rgba(0, 212, 255, 0.12);
-  --defense-glow: rgba(0, 212, 255, 0.35);
-  --good:         #00d281;
-  --good-soft:    rgba(0, 210, 129, 0.12);
-  --good-glow:    rgba(0, 210, 129, 0.35);
+  /* Electric Blue - the ONLY accent color */
+  --defense:      #1E90FF;
+  --defense-soft: rgba(30, 144, 255, 0.10);
+  --defense-glow: rgba(30, 144, 255, 0.22);
 
-  /* Red Team (Attacker) */
-  --attack:      #ff3d6b;
-  --attack-soft: rgba(255, 61, 107, 0.12);
-  --attack-glow: rgba(255, 61, 107, 0.35);
-  --warn:        #ff9f0a;
-  --warn-soft:   rgba(255, 159, 10, 0.12);
-  --warn-glow:   rgba(255, 159, 10, 0.35);
+  /* Positive states - cool grey (replaces green) */
+  --good:         #9BA3AF;
+  --good-soft:    rgba(155, 163, 175, 0.10);
+  --good-glow:    rgba(155, 163, 175, 0.18);
+
+  /* Negative / danger states - dark grey (replaces red/pink) */
+  --attack:      #6B7280;
+  --attack-soft: rgba(107, 114, 128, 0.12);
+  --attack-glow: rgba(107, 114, 128, 0.18);
+
+  /* Warning states - same grey family (replaces orange) */
+  --warn:      #9BA3AF;
+  --warn-soft: rgba(155, 163, 175, 0.10);
+  --warn-glow: rgba(155, 163, 175, 0.15);
 
   /* Semantic spot - swaps on mode inversion */
+  /* Defender: bright electric blue */
   --spot:      var(--defense);
   --spot-soft: var(--defense-soft);
   --spot-glow: var(--defense-glow);
-  --on-spot:   #0a0d14;
+  --on-spot:   #ffffff;
 
-  /* Typography */
-  --font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Fonts: Space Grotesk (headings) + JetBrains Mono (all data) */
+  --font-display: 'Space Grotesk', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono:    'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
 
   /* Spacing scale */
@@ -61,11 +68,11 @@
   --space-16: 64px;
 
   /* Radius */
-  --radius-sm:  4px;
-  --radius:     6px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
-  --radius-xl:  16px;
+  --radius-sm:   4px;
+  --radius:      6px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
   --radius-full: 9999px;
 
   /* Transitions */
@@ -74,18 +81,18 @@
   --ease-in:     cubic-bezier(.64, 0, .78, 0);
 
   /* Layout */
-  --sidebar-width: 240px;
+  --sidebar-width:     240px;
   --sidebar-collapsed: 64px;
-  --topbar-height: 52px;
-  --kpi-height: 64px;
+  --topbar-height:     52px;
+  --kpi-height:        64px;
 }
 
-/* ---- ATTACKER MODE: semantic spot inversion ---- */
+/* ---- ATTACKER MODE: stays within blue family, does NOT go pink/red ---- */
 .mode-attacker {
-  --spot:      var(--attack);
-  --spot-soft: var(--attack-soft);
-  --spot-glow: var(--attack-glow);
-  --on-spot:   #fff0f3;
+  --spot:      #2D6FD4;
+  --spot-soft: rgba(45, 111, 212, 0.10);
+  --spot-glow: rgba(45, 111, 212, 0.20);
+  --on-spot:   #ffffff;
 }
 
 /* ---- 2. RESET AND BASE ---- */
@@ -115,6 +122,7 @@ body {
 }
 
 /* ---- 3. THREE-LAYER PARALLAX HAIRLINE GRID ---- */
+/* Layer 1: Slow, background (88px grid) */
 body::before {
   content: '';
   position: fixed;
@@ -129,6 +137,7 @@ body::before {
   will-change: transform;
 }
 
+/* Layer 2: Medium, registration crosses */
 body::after {
   content: '';
   position: fixed;
@@ -147,6 +156,7 @@ body::after {
   will-change: transform, opacity;
 }
 
+/* Layer 3: Fast, coarse foreground */
 .depth-fore {
   position: fixed;
   inset: -10%;
@@ -161,7 +171,7 @@ body::after {
   will-change: transform, opacity;
 }
 
-/* ---- 4. CURSOR RETICLE ---- */
+/* ---- 4. CURSOR RETICLE (blue glow only) ---- */
 .reticle {
   position: fixed;
   width: 260px;
@@ -183,6 +193,7 @@ body:hover .reticle {
 }
 
 /* ---- 5. TYPOGRAPHY SCALE ---- */
+/* Hero: monospace, single headline KPI per section */
 .text-hero {
   font-family: var(--font-mono);
   font-size: clamp(3.4rem, 9vw, 7rem);
@@ -192,6 +203,7 @@ body:hover .reticle {
   font-variant-numeric: tabular-nums;
 }
 
+/* Display: Space Grotesk, page heading (h1) */
 .text-display {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 4rem);
@@ -200,6 +212,7 @@ body:hover .reticle {
   letter-spacing: -0.01em;
 }
 
+/* Section headings (h2) */
 .text-heading {
   font-family: var(--font-display);
   font-size: 1.25rem;
@@ -207,6 +220,7 @@ body:hover .reticle {
   line-height: 1.3;
 }
 
+/* Card titles (h3) */
 .text-subheading {
   font-family: var(--font-display);
   font-size: 0.9375rem;
@@ -226,9 +240,10 @@ body:hover .reticle {
   line-height: 1.4;
 }
 
+/* 11px monospace - absolute floor, never below */
 .text-annotation {
   font-family: var(--font-mono);
-  font-size: 0.6875rem; /* 11px - absolute minimum, never below */
+  font-size: 0.6875rem;
   font-weight: 500;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -241,13 +256,13 @@ body:hover .reticle {
 }
 
 /* Color utilities */
-.text-defense   { color: var(--defense); }
-.text-attack    { color: var(--attack); }
-.text-good      { color: var(--good); }
-.text-warn      { color: var(--warn); }
-.text-spot      { color: var(--spot); }
-.text-muted     { color: var(--ink-muted); }
-.text-faint     { color: var(--ink-faint); }
+.text-defense { color: var(--defense); }
+.text-attack   { color: var(--attack); }
+.text-good     { color: var(--good); }
+.text-warn     { color: var(--warn); }
+.text-spot     { color: var(--spot); }
+.text-muted    { color: var(--ink-muted); }
+.text-faint    { color: var(--ink-faint); }
 
 /* ---- 6. LAYOUT SHELL ---- */
 #root {
@@ -308,12 +323,12 @@ body:hover .reticle {
   position: relative;
 }
 
-/* ---- 7. GLASSMORPHISM CARDS ---- */
+/* ---- 7. GLASSMORPHISM CARDS - Smoked Black Glass ---- */
 .card {
-  background: var(--bg-glass);
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  border: 1px solid var(--border);
+  background: var(--bg-glass);       /* rgba(8,10,13,0.80) */
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--border);   /* rgba(255,255,255,0.06) */
   border-radius: var(--radius-lg);
   padding: var(--space-6);
   transition:
@@ -323,8 +338,8 @@ body:hover .reticle {
 }
 
 .card:hover {
-  border-color: var(--spot-glow);
-  box-shadow: 0 0 40px var(--spot-soft), 0 20px 48px rgba(0, 0, 0, 0.4);
+  border-color: var(--defense-glow); /* very faint blue edge */
+  box-shadow: 0 0 24px var(--defense-soft), 0 20px 48px rgba(0, 0, 0, 0.5);
   transform: translateY(-4px);
 }
 
@@ -342,7 +357,7 @@ body:hover .reticle {
   padding: var(--space-6);
 }
 
-/* ---- 8. BUTTONS ---- */
+/* ---- 8. BUTTONS - Minimalist black technical controls ---- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -361,7 +376,12 @@ body:hover .reticle {
   outline: none;
   white-space: nowrap;
   text-decoration: none;
-  transition: opacity 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -372,6 +392,7 @@ body:hover .reticle {
   pointer-events: none;
 }
 
+/* Primary: electric blue fill, white text */
 .btn-primary {
   background: var(--spot);
   color: var(--on-spot);
@@ -379,9 +400,10 @@ body:hover .reticle {
 
 .btn-primary:hover:not(:disabled) {
   opacity: 0.88;
-  box-shadow: 0 0 24px var(--spot-glow);
+  box-shadow: 0 0 20px var(--spot-glow);
 }
 
+/* Ghost: dark surface, thin grey border, becomes blue on hover */
 .btn-ghost {
   background: transparent;
   border: 1px solid var(--border-strong);
@@ -393,15 +415,27 @@ body:hover .reticle {
   color: var(--spot);
 }
 
+/* Judge Demo: black surface, thin blue border */
+.btn-judge-demo {
+  background: var(--bg-raised);
+  border: 1px solid var(--defense-glow);
+  color: var(--ink);
+}
+
+.btn-judge-demo:hover:not(:disabled) {
+  border-color: var(--spot);
+}
+
+/* Danger: dark grey border variant (no bright pink/red) */
 .btn-danger {
   background: transparent;
-  border: 1px solid var(--attack-soft);
-  color: var(--attack);
+  border: 1px solid var(--border-strong);
+  color: var(--ink-muted);
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: var(--attack-soft);
-  box-shadow: 0 0 16px var(--attack-glow);
+  border-color: var(--attack);
+  color: var(--ink);
 }
 
 .btn-sm {
@@ -414,7 +448,8 @@ body:hover .reticle {
   font-size: 0.8125rem;
 }
 
-/* ---- 9. KPI STRIP ---- */
+/* ---- 9. KPI STRIP - Mission Telemetry ---- */
+/* Reads like a classified intelligence terminal strip */
 .kpi-strip {
   display: flex;
   align-items: stretch;
@@ -436,6 +471,7 @@ body:hover .reticle {
   transition: background 0.3s ease;
 }
 
+/* The only electric blue in the strip: spot bottom-border on hover */
 .kpi-cell::after {
   content: '';
   position: absolute;
@@ -461,6 +497,7 @@ body:hover .reticle {
   border-right: none;
 }
 
+/* 11px monospace uppercase label */
 .kpi-label {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
@@ -471,6 +508,7 @@ body:hover .reticle {
   margin-bottom: 2px;
 }
 
+/* Value: always white (--ink) - no per-cell color toning */
 .kpi-value {
   font-family: var(--font-mono);
   font-size: 1.4rem;
@@ -478,8 +516,10 @@ body:hover .reticle {
   line-height: 1;
   letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 
+/* Delta: grey only, no color coding */
 .kpi-delta {
   font-family: var(--font-mono);
   font-size: 0.5625rem;
@@ -488,7 +528,7 @@ body:hover .reticle {
   color: var(--ink-faint);
 }
 
-/* ---- 10. STAT CARDS ---- */
+/* ---- 10. STAT CARDS - Precision Instrument Modules ---- */
 .stat-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -508,6 +548,7 @@ body:hover .reticle {
   color: var(--ink-faint);
 }
 
+/* Large values primarily white; tone adds subtle distinction */
 .stat-card-value {
   font-family: var(--font-mono);
   font-size: 1.75rem;
@@ -529,15 +570,23 @@ body:hover .reticle {
   letter-spacing: 0.04em;
 }
 
-/* Tone variants */
-.tone-good    { color: var(--good); }
-.tone-bad     { color: var(--attack); }
-.tone-warn    { color: var(--warn); }
-.tone-default { color: var(--ink); }
-.tone-spot    { color: var(--spot); }
+/* Tone variants:
+   good  -> cool grey  (replaces green)
+   bad   -> dark grey  (replaces red/pink)
+   warn  -> grey       (replaces orange)
+   spot  -> electric blue
+   default -> white    (--ink)
+*/
+.tone-good    { color: var(--good); }    /* #9BA3AF cool grey */
+.tone-bad     { color: var(--attack); }  /* #6B7280 dark grey */
+.tone-warn    { color: var(--warn); }    /* #9BA3AF grey */
+.tone-default { color: var(--ink); }     /* #f0f2f5 white */
+.tone-spot    { color: var(--spot); }    /* electric blue */
 .tone-muted   { color: var(--ink-muted); }
+.tone-defense { color: var(--defense); } /* electric blue alias */
 
-/* ---- 11. BADGES ---- */
+/* ---- 11. BADGES - Dark pills with thin outline borders ---- */
+/* No bright colored fills. Decision badges are always dark + thin outline. */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -552,23 +601,72 @@ body:hover .reticle {
   white-space: nowrap;
 }
 
-.badge-block   { background: var(--attack-soft);  color: var(--attack); border: 1px solid var(--attack-glow); }
-.badge-allow   { background: var(--good-soft);    color: var(--good);   border: 1px solid var(--good-glow); }
-.badge-review  { background: var(--warn-soft);    color: var(--warn);   border: 1px solid var(--warn-glow); }
-.badge-defense { background: var(--defense-soft); color: var(--defense);border: 1px solid var(--defense-glow); }
-.badge-neutral { background: var(--bg-raised);    color: var(--ink-muted); border: 1px solid var(--border); }
+/* BLOCK: blue outline (electric blue - signifies priority action) */
+.badge-block   {
+  background: var(--bg-raised);
+  color: var(--ink);
+  border: 1px solid var(--defense);
+}
 
-.badge-critical { background: var(--attack-soft);  color: var(--attack); border: 1px solid var(--attack-glow); }
-.badge-high     { background: var(--warn-soft);    color: var(--warn);   border: 1px solid var(--warn-glow); }
-.badge-medium   { background: rgba(255, 159, 10, 0.08); color: #f0a500;  border: 1px solid rgba(240, 165, 0, 0.3); }
-.badge-low      { background: var(--bg-raised);    color: var(--ink-muted); border: 1px solid var(--border); }
+/* ALLOW: grey outline */
+.badge-allow   {
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
 
-/* Live pulse badge */
+/* REVIEW: strong grey outline */
+.badge-review  {
+  background: var(--bg-raised);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+}
+
+/* LIVE: blue border, blue text, blue pulse dot */
 .badge-live {
-  background: var(--good-soft);
-  color: var(--good);
-  border: 1px solid var(--good-glow);
+  background: var(--bg-raised);
+  color: var(--spot);
+  border: 1px solid var(--defense-glow);
   animation: live-pulse 2s ease-in-out infinite;
+}
+
+/* Defense accent */
+.badge-defense {
+  background: var(--defense-soft);
+  color: var(--defense);
+  border: 1px solid var(--defense-glow);
+}
+
+/* Neutral */
+.badge-neutral {
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
+}
+
+/* Severity badges - all use grey tonal hierarchy, not colors */
+.badge-critical {
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  border: 1px solid var(--border-strong);
+}
+
+.badge-high {
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  border: 1px solid var(--border);
+}
+
+.badge-medium {
+  background: var(--bg-raised);
+  color: var(--ink-faint);
+  border: 1px solid var(--border);
+}
+
+.badge-low {
+  background: var(--bg-raised);
+  color: var(--ink-faint);
+  border: 1px solid var(--rule);
 }
 
 /* ---- 12. PROGRESS BARS ---- */
@@ -590,21 +688,24 @@ body:hover .reticle {
   transition: width 0.6s var(--ease-out);
 }
 
+/* Attack/negative: grey gradient, no colored glow */
 .progress-fill-attack {
-  background: linear-gradient(90deg, var(--attack), var(--warn));
-  box-shadow: 0 0 8px var(--attack-glow);
+  background: linear-gradient(90deg, var(--attack), var(--ink-faint));
 }
 
+/* Defense bars: electric blue */
 .progress-fill-defense {
-  background: var(--good);
+  background: var(--defense);
+  box-shadow: 0 0 8px var(--defense-glow);
 }
 
+/* Spot bars: semantic (blue in defender, deeper blue in attacker) */
 .progress-fill-spot {
   background: var(--spot);
   box-shadow: 0 0 8px var(--spot-glow);
 }
 
-/* Indeterminate shimmer (War Room running) */
+/* Indeterminate shimmer (War Room running) - blue only */
 .progress-fill-shimmer {
   background: linear-gradient(
     90deg,
@@ -681,15 +782,15 @@ body:hover .reticle {
   text-decoration: none;
 }
 
+/* Active indicator: 1px thin electric-blue vertical line at left edge */
 .nav-item::before {
   content: '';
   position: absolute;
   left: 0;
   top: 8px;
   bottom: 8px;
-  width: 3px;
+  width: 1px;
   background: var(--spot);
-  border-radius: 0 2px 2px 0;
   transform: scaleY(0);
   transform-origin: center;
   transition: transform 0.2s var(--ease-spring);
@@ -724,11 +825,12 @@ body:hover .reticle {
   text-overflow: ellipsis;
 }
 
+/* Nav badge: black pill + thin blue outline + white number */
 .nav-badge {
   margin-left: auto;
-  background: var(--spot-soft);
-  color: var(--spot);
-  border: 1px solid var(--spot-glow);
+  background: var(--bg-raised);
+  color: var(--ink);
+  border: 1px solid var(--defense-glow);
   padding: 1px 6px;
   border-radius: var(--radius-full);
   font-family: var(--font-mono);
@@ -752,6 +854,7 @@ body:hover .reticle {
   margin-bottom: var(--space-2);
 }
 
+/* Footer metrics in double-colon engineering notation: FPR::1.00 RECALL::92.8 */
 .sidebar-metrics {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
@@ -759,7 +862,7 @@ body:hover .reticle {
   letter-spacing: 0.04em;
 }
 
-/* ---- 14. MODE TOGGLE ---- */
+/* ---- 14. MODE TOGGLE - Minimalist black technical control ---- */
 .mode-toggle {
   display: flex;
   align-items: center;
@@ -794,6 +897,7 @@ body:hover .reticle {
   color: var(--on-spot);
 }
 
+/* Sliding indicator pill: electric blue in defender, deeper blue in attacker */
 .mode-toggle-indicator {
   position: absolute;
   top: 3px;
@@ -801,7 +905,10 @@ body:hover .reticle {
   height: calc(100% - 6px);
   border-radius: var(--radius-full);
   background: var(--spot);
-  transition: transform 0.35s var(--ease-spring), width 0.35s var(--ease-spring), background 0.4s ease;
+  transition:
+    transform 0.35s var(--ease-spring),
+    width 0.35s var(--ease-spring),
+    background 0.4s ease;
   box-shadow: 0 0 12px var(--spot-glow);
 }
 
@@ -826,10 +933,10 @@ body:hover .reticle {
 }
 
 .terminal-line-info    { color: var(--ink-muted); }
-.terminal-line-success { color: var(--good); }
-.terminal-line-warn    { color: var(--warn); }
-.terminal-line-error   { color: var(--attack); }
-.terminal-line-accent  { color: var(--spot); }
+.terminal-line-success { color: var(--good); }    /* cool grey */
+.terminal-line-warn    { color: var(--warn); }    /* grey */
+.terminal-line-error   { color: var(--attack); }  /* dark grey */
+.terminal-line-accent  { color: var(--spot); }    /* electric blue */
 .terminal-line-dim     { color: var(--ink-faint); }
 
 /* ---- 16. TOPBAR ---- */
@@ -874,12 +981,14 @@ body:hover .reticle {
 .band-surface { background: var(--bg-surface); }
 .band-raised  { background: var(--bg-raised); }
 
+/* War Room / Red Team sections use deeper blue accent */
 .band-attacker {
-  --spot:      var(--attack);
-  --spot-soft: var(--attack-soft);
-  --spot-glow: var(--attack-glow);
+  --spot:      #2D6FD4;
+  --spot-soft: rgba(45, 111, 212, 0.10);
+  --spot-glow: rgba(45, 111, 212, 0.20);
 }
 
+/* Overview / Blue Team sections use bright blue accent */
 .band-defender {
   --spot:      var(--defense);
   --spot-soft: var(--defense-soft);
@@ -898,7 +1007,9 @@ body:hover .reticle {
   margin-bottom: var(--space-6);
 }
 
+/* Page title uses Space Grotesk (display font) */
 .page-title {
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--ink);
@@ -916,15 +1027,15 @@ body:hover .reticle {
   gap: var(--space-4);
 }
 
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-2    { grid-template-columns: repeat(2, 1fr); }
+.grid-3    { grid-template-columns: repeat(3, 1fr); }
+.grid-4    { grid-template-columns: repeat(4, 1fr); }
 .grid-auto { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 
 /* Flex helpers */
-.flex       { display: flex; }
-.flex-col   { flex-direction: column; }
-.items-center { align-items: center; }
+.flex            { display: flex; }
+.flex-col        { flex-direction: column; }
+.items-center    { align-items: center; }
 .justify-between { justify-content: space-between; }
 .gap-2 { gap: var(--space-2); }
 .gap-3 { gap: var(--space-3); }
@@ -977,10 +1088,16 @@ tbody td {
   vertical-align: middle;
 }
 
-/* Attack event row flash */
+/* Attack event row: grey border flash, no colored fill */
 .row-attack-evaded {
   border-left: 2px solid var(--attack);
   animation: row-flash 0.3s ease;
+}
+
+/* Selected table row: blue left border */
+.row-selected {
+  border-left: 2px solid var(--spot);
+  background: var(--bg-raised);
 }
 
 /* ---- 20. SCROLLBAR GLOBAL ---- */
@@ -1078,7 +1195,7 @@ tbody td {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 200;
@@ -1102,6 +1219,7 @@ tbody td {
   position: relative;
 }
 
+/* Thin electric blue progress bar sweeps during execution */
 .modal-progress-bar {
   position: absolute;
   top: 0;
@@ -1252,36 +1370,50 @@ tbody td {
   align-self: stretch;
 }
 
-/* ---- 27. LIVE INDICATOR DOT ---- */
+/* ---- 27. LIVE INDICATOR DOT - Electric blue, not green ---- */
 .live-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--good);
+  background: var(--spot);
   flex-shrink: 0;
   animation: live-pulse 2s ease-in-out infinite;
 }
 
 /* ---- 28. ARMS RACE INDEX BAR ---- */
+/* Grey gradient only - no colored glow */
 .ari-bar {
   position: relative;
   height: 8px;
-  background: linear-gradient(90deg, var(--attack), var(--bg-raised) 50%, var(--good));
+  background: linear-gradient(90deg, var(--bg-raised) 0%, var(--border-strong) 50%, var(--bg-raised) 100%);
+  border: 1px solid var(--border);
   border-radius: var(--radius-full);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .ari-indicator {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   background: var(--ink);
   border: 2px solid var(--bg-void);
   border-radius: 50%;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
   transition: left 0.6s var(--ease-spring);
+}
+
+/* Labels beneath ARI bar */
+.ari-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* ---- 29. KEYFRAME ANIMATIONS ---- */
@@ -1296,7 +1428,8 @@ tbody td {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @keyframes fade-in {
@@ -1319,9 +1452,10 @@ tbody td {
   100% { background-position: 200% 0; }
 }
 
+/* Live pulse: electric blue, not green */
 @keyframes live-pulse {
-  0%, 100% { opacity: 1;    box-shadow: 0 0 0 0 var(--good-soft); }
-  50%       { opacity: 0.75; box-shadow: 0 0 0 6px rgba(0, 210, 129, 0); }
+  0%, 100% { opacity: 1;    box-shadow: 0 0 0 0 var(--spot-soft); }
+  50%       { opacity: 0.75; box-shadow: 0 0 0 6px rgba(30, 144, 255, 0); }
 }
 
 @keyframes value-pulse {
@@ -1343,6 +1477,16 @@ tbody td {
 @keyframes slide-in-left {
   from { opacity: 0; transform: translateX(-10px); }
   to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(calc(100% + 24px)); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
 }
 
 /* Staggered KPI strip entrance on load */

@@ -99,22 +99,22 @@ export function Sidebar({
         ))}
       </div>
 
-      {/* Footer status */}
+      {/* Footer status: blue pulse dot, double-colon engineering notation */}
       <div className="sidebar-footer">
         <div className="sidebar-status">
           {isLive && <span className="live-dot" />}
           <span
             className="text-annotation"
-            style={{ color: isLive ? 'var(--good)' : 'var(--ink-faint)' }}
+            style={{ color: isLive ? 'var(--spot)' : 'var(--ink-faint)' }}
           >
             {isLive ? 'LIVE' : 'OFFLINE'}
           </span>
           <span className="text-annotation" style={{ color: 'var(--ink-faint)', marginLeft: 4 }}>
-            Model {modelVersion}
+            MODEL::{modelVersion.toUpperCase()}
           </span>
         </div>
         <div className="sidebar-metrics">
-          FPR: {fpr.toFixed(2)}%&nbsp;&nbsp;Recall: {recall.toFixed(1)}%
+          FPR::{fpr.toFixed(2)}&nbsp;&nbsp;RECALL::{recall.toFixed(1)}
         </div>
       </div>
     </nav>
