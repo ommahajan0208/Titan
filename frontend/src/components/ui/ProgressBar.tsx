@@ -1,8 +1,13 @@
 <<<<<<< HEAD
+import React from 'react'
+
+=======
+<<<<<<< HEAD
 =======
 import React from 'react'
 
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 interface ProgressBarProps {
   value: number          // 0..1
   variant?: 'attack' | 'defense' | 'spot' | 'shimmer'
@@ -11,9 +16,13 @@ interface ProgressBarProps {
   showPercent?: boolean
   className?: string
 <<<<<<< HEAD
+  style?: React.CSSProperties
+=======
+<<<<<<< HEAD
 =======
   style?: React.CSSProperties
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 }
 
 export function ProgressBar({
@@ -24,18 +33,26 @@ export function ProgressBar({
   showPercent = false,
   className = '',
 <<<<<<< HEAD
+  style,
+=======
+<<<<<<< HEAD
 =======
   style,
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 }: ProgressBarProps) {
   const pct = Math.min(100, Math.max(0, value * 100))
 
   return (
 <<<<<<< HEAD
+    <div className={className} style={style}>
+=======
+<<<<<<< HEAD
     <div className={className}>
 =======
     <div className={className} style={style}>
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
       {(label || showPercent) && (
         <div
           style={{

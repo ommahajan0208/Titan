@@ -1,14 +1,24 @@
 <<<<<<< HEAD
+// No React import needed - JSX transform handles this automatically
+=======
+<<<<<<< HEAD
 import React from 'react'
 =======
 // No React import needed - JSX transform handles this automatically
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 
 export interface KpiCellData {
   id: string
   label: string
   value: string
   delta?: string
+<<<<<<< HEAD
+  // tone is kept for future use but KPI values are always white per design spec
+  tone?: 'good' | 'warn' | 'attack' | 'defense' | 'spot' | 'default'
+}
+
+=======
 <<<<<<< HEAD
   tone?: 'good' | 'warn' | 'attack' | 'defense' | 'spot' | 'default'
 }
@@ -28,6 +38,7 @@ const TONE_COLOR: Record<string, string> = {
 }
 
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
 interface KpiStripProps {
   cells: KpiCellData[]
 }
@@ -38,6 +49,15 @@ export function KpiStrip({ cells }: KpiStripProps) {
       {cells.map(cell => (
         <div key={cell.id} className="kpi-cell">
           <div className="kpi-label">{cell.label}</div>
+<<<<<<< HEAD
+          {/* KPI values are always white - no per-cell color toning per design spec */}
+          <div className="kpi-value">
+            {cell.value}
+          </div>
+          {cell.delta && (
+            // Delta is grey only - no color coding per design spec
+            <div className="kpi-delta">
+=======
 <<<<<<< HEAD
           <div
             className="kpi-value"
@@ -61,6 +81,7 @@ export function KpiStrip({ cells }: KpiStripProps) {
             // Delta is grey only - no color coding per design spec
             <div className="kpi-delta">
 >>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
+>>>>>>> origin/main
               {cell.delta}
             </div>
           )}
