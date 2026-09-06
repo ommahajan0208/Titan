@@ -4,7 +4,8 @@
 
 import type {
   DashboardData, AttackVector, ScenarioItem, GenerationRecord,
-  AtlasCell, NebulaNode, NebulaEdge, WarRoomState, ModelRecord, FidelityMetrics
+  AtlasCell, NebulaNode, NebulaEdge, WarRoomState, ModelRecord, FidelityMetrics,
+  ScoredPayment,
 } from '../types'
 
 export const MOCK_DASHBOARD: DashboardData = {
@@ -127,3 +128,116 @@ export const MOCK_FIDELITY: FidelityMetrics = {
   provenance_auc: 0.512,
   fidelity_score: 84.7,
 }
+
+// ---------------------------------------------------------------------------
+// MOCK_STREAM_PAYMENTS - 500 deterministic pre-scored rows (SEED=42)
+// Distribution: 75% legitimate, 25% fraud (25x oversampled vs ~1% production)
+// Fraud covers all 6 attack families proportionally.
+// Includes deliberate FN (APPROVE on is_fraud=true) and FP (BLOCK on is_fraud=false)
+// Timestamps cycle through a realistic working day 08:00-22:00 IST
+// ---------------------------------------------------------------------------
+function mkStream(): ScoredPayment[] {
+  // Seeded LCG (seed=42) - deterministic, no Math.random()
+  let s = 42
+  const rng = () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff }
+
+  const RAILS  = ['UPI_P2M', 'IMPS', 'NEFT', 'RTP_FEDNOW', 'SEPA_INST', 'CARD_CNP'] as const
+  const CHANS  = ['mobile', 'web', 'agentic', 'IVR'] as const
+  const FAMS   = [
+    { id: 'ATO', name: 'account_takeover' },
+    { id: 'SYN', name: 'synthetic_identity' },
+    { id: 'MUL', name: 'mule_network' },
+    { id: 'CNP', name: 'card_testing' },
+    { id: 'BIO', name: 'behavioral_impersonation' },
+    { id: 'ADV', name: 'model_inversion' },
+  ] as const
+
+  const rows: ScoredPayment[] = []
+  let cursor = 0
+
+  for (let i = 0; i < 500; i++) {
+    // 25% fraud
+    const is_fraud = rng() < 0.25
+
+    // Amount: lognormal-ish - mostly ₹500-₹50000, tail to ₹200000
+    const rawAmt = Math.floor(500 + Math.pow(rng(), 1.6) * 199500)
+    const amount = Math.min(rawAmt, 200000)
+
+    // Rail and channel
+    const rail  = RAILS[Math.floor(rng() * RAILS.length)]
+    const channel = CHANS[Math.floor(rng() * CHANS.length)]
+
+    // Timestamp cycling through 08:00-22:00 IST (14h window)
+    const totalMinutes = 8 * 60 + Math.floor((cursor / 500) * 14 * 60)
+    const hh = Math.floor(totalMinutes / 60).toString().padStart(2, '0')
+    const mm = (totalMinutes % 60).toString().padStart(2, '0')
+    const ss = Math.floor(rng() * 60).toString().padStart(2, '0')
+    const timestamp = `${hh}:${mm}:${ss}`
+    cursor++
+
+    // Attack family (only for fraud rows)
+    const famIdx = Math.floor(rng() * FAMS.length)
+    const fam = FAMS[famIdx]
+    const attack_family = is_fraud ? fam.name : null
+    const attack_vector_id = is_fraud ? `${fam.id}-0${Math.floor(rng() * 4) + 1}` : null
+
+    // Score generation
+    let score: number
+    let decision: ScoredPayment['decision']
+    let layer_fired: ScoredPayment['layer_fired']
+
+    if (is_fraud) {
+      // ~18 deliberate false negatives out of ~125 fraud rows (~14%)
+      const isFn = rng() < 0.145
+      if (isFn) {
+        // False negative: fraud slips through
+        score = 0.1 + rng() * 0.32    // low score
+        decision = 'APPROVE'
+        layer_fired = null
+      } else {
+        score = 0.55 + rng() * 0.44   // high score
+        decision = score > 0.75 ? 'BLOCK' : 'ALERT'
+        // Higher score = earlier layer catches it
+        if (score > 0.88) layer_fired = 'L0'
+        else if (score > 0.78) layer_fired = 'L1'
+        else if (score > 0.68) layer_fired = 'L2'
+        else layer_fired = 'L3'
+      }
+    } else {
+      // ~8 deliberate false positives out of ~375 legit rows (~2%)
+      const isFp = rng() < 0.021
+      if (isFp) {
+        score = 0.52 + rng() * 0.25
+        decision = score > 0.68 ? 'BLOCK' : 'ALERT'
+        layer_fired = 'L1'
+      } else {
+        score = rng() * 0.45          // low score for legit
+        decision = 'APPROVE'
+        layer_fired = null
+      }
+    }
+
+    // Short anonymised payer ID
+    const hexPart = (i * 0x9e3779b9 + 0x5f3759df) & 0xffff
+    const payer_id = `TXN_${hexPart.toString(16).toUpperCase().padStart(4, '0')}`
+
+    rows.push({
+      txn_id: `T-${String(i + 1).padStart(5, '0')}`,
+      timestamp,
+      payer_id,
+      amount,
+      rail,
+      channel,
+      attack_family,
+      attack_vector_id,
+      score: Math.round(score * 1000) / 1000,
+      decision,
+      layer_fired,
+      is_fraud,
+    })
+  }
+
+  return rows
+}
+
+export const MOCK_STREAM_PAYMENTS: ScoredPayment[] = mkStream()

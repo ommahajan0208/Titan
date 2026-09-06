@@ -99,54 +99,22 @@ export function Sidebar({
         ))}
       </div>
 
-<<<<<<< HEAD
       {/* Footer status: blue pulse dot, double-colon engineering notation */}
-=======
-<<<<<<< HEAD
-      {/* Footer status */}
-=======
-      {/* Footer status: blue pulse dot, double-colon engineering notation */}
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
       <div className="sidebar-footer">
         <div className="sidebar-status">
           {isLive && <span className="live-dot" />}
           <span
             className="text-annotation"
-<<<<<<< HEAD
             style={{ color: isLive ? 'var(--spot)' : 'var(--ink-faint)' }}
-=======
-<<<<<<< HEAD
-            style={{ color: isLive ? 'var(--good)' : 'var(--ink-faint)' }}
-=======
-            style={{ color: isLive ? 'var(--spot)' : 'var(--ink-faint)' }}
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
           >
             {isLive ? 'LIVE' : 'OFFLINE'}
           </span>
           <span className="text-annotation" style={{ color: 'var(--ink-faint)', marginLeft: 4 }}>
-<<<<<<< HEAD
             MODEL::{modelVersion.toUpperCase()}
           </span>
         </div>
         <div className="sidebar-metrics">
           FPR::{fpr.toFixed(2)}&nbsp;&nbsp;RECALL::{recall.toFixed(1)}
-=======
-<<<<<<< HEAD
-            Model {modelVersion}
-          </span>
-        </div>
-        <div className="sidebar-metrics">
-          FPR: {fpr.toFixed(2)}%&nbsp;&nbsp;Recall: {recall.toFixed(1)}%
-=======
-            MODEL::{modelVersion.toUpperCase()}
-          </span>
-        </div>
-        <div className="sidebar-metrics">
-          FPR::{fpr.toFixed(2)}&nbsp;&nbsp;RECALL::{recall.toFixed(1)}
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
         </div>
       </div>
     </nav>
