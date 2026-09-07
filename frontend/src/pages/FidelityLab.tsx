@@ -1,20 +1,47 @@
-import React from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { ProgressBar } from '../components/ui/ProgressBar'
+import { Button } from '../components/ui/Button'
 import { MOCK_FIDELITY } from '../services/mockData'
-import { CheckCircle, XCircle } from 'lucide-react'
+import { api } from '../services/api'
+import { CheckCircle, XCircle, RefreshCw } from 'lucide-react'
+import type { FidelityMetrics } from '../types'
 
 export default function FidelityLab() {
-  const f = MOCK_FIDELITY
+  const [f, setF] = useState<FidelityMetrics>(MOCK_FIDELITY)
+  const [loading, setLoading] = useState(false)
+
+  const fetchFidelity = useCallback(() => {
+    setLoading(true)
+    api.getFidelityMetrics()
+      .then(data => { if (data) setF(data) })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { fetchFidelity() }, [fetchFidelity])
+
   const score = f.fidelity_score
+
 
   return (
     <div className="page">
       <div className="page-header">
         <h1 className="page-title">Fidelity Lab</h1>
         <p className="page-subtitle">Synthetic data realism metrics - how real does our simulator look?</p>
+        <Button
+          id="fidelity-refresh"
+          variant="ghost"
+          size="sm"
+          icon={<RefreshCw size={12} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />}
+          onClick={fetchFidelity}
+          disabled={loading}
+          style={{ marginTop: 'var(--space-2)' }}
+        >
+          {loading ? 'Running tests...' : 'Re-run tests'}
+        </Button>
       </div>
 
       <div className="grid grid-3 mb-6">

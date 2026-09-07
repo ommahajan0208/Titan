@@ -5,8 +5,9 @@
 import axios from 'axios'
 import type {
   DashboardData, AttackVector, ScenarioItem,
-  FidelityMetrics, ModelRecord, AtlasCell,
+  FidelityMetrics, ModelRecord, AtlasCell, ScoredPayment,
 } from '../types'
+
 
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8000/api'
 
@@ -57,15 +58,21 @@ export const api = {
 
   // Taxonomy
   getTaxonomy: () => client.get<AttackVector[]>('/taxonomy').then(r => r.data),
-  getKnowledgeGraph: () => client.get<{ nodes: unknown[]; edges: unknown[] }>('/graph/mules').then(r => r.data),
+  getKnowledgeGraph: () => client.get<{ nodes: unknown[]; edges: unknown[] }>('/graph/nebula').then(r => r.data),
 
   // Red Team / Attacks
   generateAttacks: (params: GenerateParams = {}) =>
-    client.post<ScenarioItem[]>('/attacks/generate', params).then(r => r.data),
+    client.post<{ scenarios: ScenarioItem[]; genomes: unknown[] }>('/attacks/generate', params).then(r => r.data),
 
   // Scoring
   scoreEvent: (event: Record<string, unknown>) =>
     client.post<{ decision: string; fused_score: number; scores: Record<string, number> }>('/score', event).then(r => r.data),
+
+  // Live payment stream
+  getStreamTransactions: (limit = 500) =>
+    client.get<ScoredPayment[]>(`/stream/transactions?limit=${limit}`).then(r => r.data),
+  scoreStreamEvent: (event: Record<string, unknown>) =>
+    client.post<{ fused_score: number; decision: string; layer_fired: string | null; server_compute_ms: number }>('/stream/score', event).then(r => r.data),
 
   // Simulation
   runSimulation: (params: SimulationParams = {}) =>
@@ -82,22 +89,31 @@ export const api = {
     client.post<{ status: string }>('/models/rollback', { model_id: modelId }).then(r => r.data),
 
   // Gap Analysis
-  getGapAnalysis: () => client.get<{ clusters: unknown[]; evasion_summary: unknown }>('/gap-analysis').then(r => r.data),
+  getGapAnalysis: (scenarios: ScenarioItem[]) =>
+    client.post<{ clusters: unknown[]; evasion_summary: unknown }>('/gap/analyze', scenarios).then(r => r.data),
 
   // Evolution history
   getEvolutionHistory: () => client.get<unknown[]>('/evolution').then(r => r.data),
 
   // MAP-Elites Atlas
-  getAtlas: () => client.get<AtlasCell[]>('/atlas').then(r => r.data),
+  getAtlas: () => client.get<{ cells: AtlasCell[]; summary: unknown }>('/gap/atlas').then(r => r.data),
+
+  // Adaptive runs (War Room)
+  startRun: () => client.post<{ run_id: string; status: string; seed: number }>('/adaptive/runs').then(r => r.data),
+  getRunState: (runId: string) => client.get<unknown>(`/adaptive/runs/${runId}/state`).then(r => r.data),
+  getRunGenerations: (runId: string) => client.get<unknown>(`/adaptive/runs/${runId}/generations`).then(r => r.data),
+  getOracleReport: (runId: string) => client.get<unknown>(`/adaptive/runs/${runId}/oracle`).then(r => r.data),
+  stopRun: (runId: string) => client.delete<{ status: string }>(`/adaptive/runs/${runId}`).then(r => r.data),
 
   // Judge Demo (9-step pipeline)
   runJudgeDemo: () =>
-    client.post<{ steps: Array<{ step: number; title: string; status: string; details: string }> }>('/judge-demo/run').then(r => r.data),
+    client.post<{ steps: Array<{ step: number; title: string; status: string; detail: string }> }>('/judge-demo/summary').then(r => r.data),
 
   // Audit log
-  getAuditLog: () => client.get<unknown[]>('/audit').then(r => r.data),
+  getAuditLog: (limit = 50) => client.get<unknown[]>(`/audit/events?limit=${limit}`).then(r => r.data),
 
   // Demo mode toggle
   setDemoMode: (enabled: boolean) =>
     client.post<{ status: string }>('/demo-mode', { enabled }).then(r => r.data),
 }
+

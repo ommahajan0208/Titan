@@ -13,13 +13,21 @@
 from __future__ import annotations
 
 import logging
+import os
+import sys
 import time
 from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
+# Ensure backend package is importable when uvicorn runs from the Titan/ root.
+_BACKEND_DIR = os.path.join(os.path.dirname(__file__), "backend")
+if _BACKEND_DIR not in sys.path:
+    sys.path.insert(0, _BACKEND_DIR)
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+
 
 from config import cfg
 
@@ -36,6 +44,7 @@ from backend.routers import adaptive as adaptive_router
 from backend.routers import audit as audit_router
 from backend.routers import kyc as kyc_router
 from backend.routers import demo as demo_router
+from backend.routers import stream as stream_router
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -76,7 +85,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Phase 6 will add:  novelty_engine = NoveltyEngine(cfg); app.state.novelty = ne
     # ---------------------f-------------------------------------------------
 
-    log.info("BP1 startup complete - all stubs ready, /api/health and /api/overview are live.")
+    log.info("Phase 7 startup complete - all 36 endpoints live, stream router active.")
 
     yield  # Application runs here
 
@@ -159,6 +168,7 @@ app.include_router(adaptive_router.router,   prefix="/api")
 app.include_router(audit_router.router,      prefix="/api")
 app.include_router(kyc_router.router,        prefix="/api")
 app.include_router(demo_router.router,       prefix="/api")
+app.include_router(stream_router.router,     prefix="/api")
 
 
 # ---------------------------------------------------------------------------

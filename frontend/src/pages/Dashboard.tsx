@@ -16,7 +16,7 @@
 //
 // Design law: no h1 page title, no red/amber/green, stream is the page.
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { ArgumentBar } from '../components/ui/ArgumentBar'
 import { PaymentStreamTable } from '../components/ui/PaymentStreamTable'
 import { StreamCounterRail } from '../components/ui/StreamCounterRail'
@@ -26,6 +26,7 @@ import { Button } from '../components/ui/Button'
 import { StreamRowInspector } from '../modals/StreamRowInspector'
 import { usePaymentStream } from '../hooks/usePaymentStream'
 import { useAppStore } from '../stores/appStore'
+import { api } from '../services/api'
 import { MOCK_STREAM_PAYMENTS, MOCK_DASHBOARD } from '../services/mockData'
 import type { ScoredPayment } from '../types'
 import { Play, RefreshCw, Swords } from 'lucide-react'
@@ -35,10 +36,20 @@ export default function Dashboard() {
   const setJudge    = useAppStore(s => s.setJudgeDemoOpen)
   const isDemoMode  = useAppStore(s => s.isDemoMode)
 
-  // Selected row for the StreamRowInspector drawer
   const [inspectedRow, setInspectedRow] = useState<ScoredPayment | null>(null)
+  const [streamSource, setStreamSource] = useState<ScoredPayment[]>(MOCK_STREAM_PAYMENTS)
 
-  // The live stream hook - auto-starts on Dashboard mount
+  // Fetch live stream data from backend on mount; fall back to mock if unavailable
+  useEffect(() => {
+    api.getStreamTransactions(500)
+      .then(rows => {
+        if (rows && rows.length > 0) setStreamSource(rows)
+      })
+      .catch(() => {
+        // backend unavailable - MOCK_STREAM_PAYMENTS is already set as default
+      })
+  }, [])
+
   const {
     rows,
     counters,
@@ -47,13 +58,14 @@ export default function Dashboard() {
     setRate,
     toggle,
     reset,
-  } = usePaymentStream(MOCK_STREAM_PAYMENTS, true /* autoStart */)
+  } = usePaymentStream(streamSource, true /* autoStart */)
 
   const handleRowClick = useCallback((row: ScoredPayment) => {
     setInspectedRow(row)
   }, [])
 
   const kpi = MOCK_DASHBOARD.kpis
+
 
   return (
     <div className="page" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>

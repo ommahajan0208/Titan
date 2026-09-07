@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { LoopHelix3D } from '../three/LoopHelix3D'
 import { MOCK_GENERATIONS } from '../services/mockData'
 import { useAppStore } from '../stores/appStore'
+import { api } from '../services/api'
+import type { ModelRecord } from '../types'
 
-const ROUNDS = [
+const ROUNDS_FALLBACK = [
   { version: 'v1.0', evasions: 12, f1: 0.948, recall: 0.82, fpr: 0.028, notes: 'Baseline - 36 vectors tested' },
   { version: 'v2.0', evasions: 6,  f1: 0.968, recall: 0.91, fpr: 0.015, notes: 'Counter-examples: mule_network focus' },
   { version: 'v3.0', evasions: 2,  f1: 0.991, recall: 0.928, fpr: 0.010, notes: 'Adversarial hardening complete' },
@@ -15,6 +17,25 @@ const ROUNDS = [
 export default function Evolution() {
   const mode = useAppStore(s => s.mode)
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [liveModels, setLiveModels] = useState<ModelRecord[] | null>(null)
+
+  useEffect(() => {
+    api.getModelBenchmarks()
+      .then(data => { if (data && data.length) setLiveModels(data) })
+      .catch(() => {})
+  }, [])
+
+  // Build rounds from live models if available, else use fallback
+  const rounds = liveModels
+    ? [...liveModels].reverse().map((m, i) => ({
+        version: m.version,
+        evasions: Math.max(0, Math.round((1 - m.recall) * 94)),
+        f1: m.f1,
+        recall: m.recall,
+        fpr: m.fpr,
+        notes: m.training_notes ?? m.notes ?? `Defense ${m.version}`,
+      }))
+    : ROUNDS_FALLBACK
 
   return (
     <div className="page">
@@ -25,11 +46,11 @@ export default function Evolution() {
 
       {/* Round cards */}
       <div className="flex gap-4 mb-6" style={{ overflowX: 'auto', paddingBottom: 4 }}>
-        {ROUNDS.map((r, i) => (
+        {rounds.map((r, i) => (
           <Card key={r.version} style={{ minWidth: 240, flexShrink: 0 }}>
             <div className="flex items-center justify-between mb-3">
               <span className="text-annotation" style={{ color: 'var(--ink-faint)' }}>Round {i + 1}</span>
-              {i === ROUNDS.length - 1 && <Badge variant="allow">Active</Badge>}
+              {i === rounds.length - 1 && <Badge variant="allow">Active</Badge>}
             </div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: '1.5rem', fontWeight: 400, color: 'var(--spot)', marginBottom: 8 }}>
               Defense {r.version}

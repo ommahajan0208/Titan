@@ -9,7 +9,7 @@
 // Special copy for FP: "Legitimate payment incorrectly flagged. FPR budget
 //   governs how many of these the system permits."
 
-import { useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import type { ScoredPayment } from '../types'
 import { deriveOutcome } from '../types'
 
@@ -29,6 +29,40 @@ interface StreamRowInspectorProps {
   onClose: () => void
 }
 
+function Section({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div style={{ marginBottom: 'var(--space-6)' }}>
+      <div style={{
+        fontFamily: 'var(--font-mono)',
+        fontSize: '0.5625rem',
+        fontWeight: 700,
+        letterSpacing: '0.12em',
+        textTransform: 'uppercase',
+        color: 'var(--ink-faint)',
+        marginBottom: 'var(--space-3)',
+        paddingBottom: 'var(--space-1)',
+        borderBottom: '1px solid var(--rule)',
+      }}>
+        {label}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+        {children}
+      </div>
+    </div>
+  )
+}
+
+function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+      <span style={{ fontSize: '0.6875rem', color: 'var(--ink-faint)' }}>{label}</span>
+      <span style={{ fontFamily: mono ? 'var(--font-mono)' : undefined, fontSize: '0.75rem', color: 'var(--ink)' }}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
 export function StreamRowInspector({ row, onClose }: StreamRowInspectorProps) {
   const outcome = deriveOutcome(row.decision, row.is_fraud)
   const drawerRef = useRef<HTMLDivElement>(null)
@@ -40,7 +74,7 @@ export function StreamRowInspector({ row, onClose }: StreamRowInspectorProps) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  // Trap focus + close on backdrop click
+  // Close on backdrop click
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose()
   }
@@ -217,42 +251,6 @@ export function StreamRowInspector({ row, onClose }: StreamRowInspectorProps) {
           </Section>
         </div>
       </div>
-    </div>
-  )
-}
-
-function Section({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 'var(--space-6)' }}>
-      <div style={{
-        fontFamily: 'var(--font-mono)',
-        fontSize: '0.5625rem',
-        fontWeight: 700,
-        letterSpacing: '0.12em',
-        textTransform: 'uppercase',
-        color: 'var(--ink-faint)',
-        marginBottom: 'var(--space-3)',
-        paddingBottom: 'var(--space-1)',
-        borderBottom: '1px solid var(--rule)',
-      }}>
-        {label}
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-import React from 'react'
-
-function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-      <span style={{ fontSize: '0.6875rem', color: 'var(--ink-faint)' }}>{label}</span>
-      <span style={{ fontFamily: mono ? 'var(--font-mono)' : undefined, fontSize: '0.75rem', color: 'var(--ink)' }}>
-        {value}
-      </span>
     </div>
   )
 }

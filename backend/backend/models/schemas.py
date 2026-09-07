@@ -439,3 +439,62 @@ class StubResponse(BaseModel):
     status: str = "stub"
     phase: str = "BP1"
     message: str = "This endpoint will be fully implemented in a later build phase."
+
+
+# ---------------------------------------------------------------------------
+# MAP-Elites atlas cell
+# ---------------------------------------------------------------------------
+
+
+class AtlasCell(BaseModel):
+    cell_id: str
+    x: int = Field(ge=0, le=9, description="Velocity bin (0-9)")
+    y: int = Field(ge=0, le=11, description="Graph-footprint bin (0-11)")
+    visited: bool = False
+    evasion_rate: float = Field(default=0.0, ge=0.0, le=1.0)
+    hardened: bool = False
+    elite_genome_id: Optional[str] = None
+
+
+# ---------------------------------------------------------------------------
+# Economy snapshot (used by GenerationRecord)
+# ---------------------------------------------------------------------------
+
+
+class EconomySnapshot(BaseModel):
+    red_treasury: float = 10_000.0
+    blue_treasury: float = 10_000.0
+    balanced: bool = True
+
+
+# ---------------------------------------------------------------------------
+# Per-generation record (used by Evolution page + adaptive router)
+# ---------------------------------------------------------------------------
+
+
+class RedStrategySummary(BaseModel):
+    dominant_family: str
+    composite_share: float
+    population_size: int
+    memory_size: int = 0
+
+
+class GenerationRecord(BaseModel):
+    generation: int
+    run_id: str
+    detection_rate_fixed_set: float
+    detection_rate_new_vectors: float
+    recall: float
+    precision: float
+    false_positive_rate: float
+    arms_race_index: float
+    arms_race_regime: Literal[
+        "red_ascendant", "blue_ascendant", "contested", "stalemate"
+    ]
+    novelty_archive_size: int
+    n_emergent_events: int
+    economy: EconomySnapshot
+    blue_policy: DefensePolicy
+    red_strategy_summary: RedStrategySummary
+    elapsed_seconds: float
+

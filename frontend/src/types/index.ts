@@ -173,8 +173,9 @@ export interface AtlasCell {
   visited: boolean
   evasion_rate: number
   hardened: boolean
-  elite_genome_id?: string
+  elite_genome_id?: string | null
 }
+
 
 // War Room live state
 export interface WarRoomState {
@@ -258,6 +259,7 @@ export interface ModelRecord {
   fidelity_score: number
   created_at: string
   is_active: boolean
+  notes?: string
   training_notes?: string
 }
 

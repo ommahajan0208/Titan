@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
@@ -8,6 +8,7 @@ import { MOCK_ATLAS_CELLS } from '../services/mockData'
 import { BlindSpotAtlas3D } from '../three/BlindSpotAtlas3D'
 import { RefreshCw } from 'lucide-react'
 import { useAppStore } from '../stores/appStore'
+import { api } from '../services/api'
 import type { AtlasCell } from '../types'
 
 const CLUSTERS = [
@@ -19,7 +20,26 @@ const CLUSTERS = [
 export default function GapAnalysis() {
   const mode = useAppStore(s => s.mode)
   const [selectedCell, setSelectedCell] = useState<AtlasCell | null>(null)
+  const [cells, setCells] = useState<AtlasCell[]>(MOCK_ATLAS_CELLS)
+  const [loading, setLoading] = useState(false)
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  const fetchAtlas = useCallback(() => {
+    setLoading(true)
+    api.getAtlas()
+      .then(data => {
+        const arr = (data as any)?.cells ?? data
+        if (Array.isArray(arr) && arr.length > 0) setCells(arr)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => { fetchAtlas() }, [fetchAtlas])
+
+  const visitedCount = cells.filter(c => c.visited).length
+  const hardenedCount = cells.filter(c => c.hardened).length
+  const coverage = Math.round((visitedCount / cells.length) * 100)
 
   return (
     <div className="page">
@@ -32,8 +52,16 @@ export default function GapAnalysis() {
         <StatCard label="Evaded"   value="9"    sub="of 94 tested" tone="bad"  style={{ minWidth: 120 }} />
         <StatCard label="Rate"     value="9.6%" sub="evasion rate" tone="warn" style={{ minWidth: 120 }} />
         <StatCard label="Clusters" value="3"    sub="K-Means"      tone="spot" style={{ minWidth: 120 }} />
-        <Button variant="ghost" icon={<RefreshCw size={14} />} style={{ marginLeft: 'auto' }}>
-          Re-Analyze
+        <StatCard label="Coverage" value={`${coverage}%`} sub={`${hardenedCount} hardened`} tone="spot" style={{ minWidth: 120 }} />
+        <Button
+          id="gap-re-analyze"
+          variant="ghost"
+          icon={<RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />}
+          style={{ marginLeft: 'auto' }}
+          onClick={fetchAtlas}
+          disabled={loading}
+        >
+          {loading ? 'Analyzing...' : 'Re-Analyze'}
         </Button>
       </div>
 
@@ -67,7 +95,7 @@ export default function GapAnalysis() {
           )}
         </div>
         <BlindSpotAtlas3D
-          cells={MOCK_ATLAS_CELLS}
+          cells={cells}
           onCellClick={setSelectedCell}
           reduced={reduced}
           height={340}
