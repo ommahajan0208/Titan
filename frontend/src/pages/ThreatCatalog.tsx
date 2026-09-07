@@ -2,6 +2,7 @@ import { Card } from '../components/ui/Card'
 import { Badge, SeverityBadge } from '../components/ui/Badge'
 import { EmptyState } from '../components/ui/LoadingState'
 import { MOCK_TAXONOMY } from '../services/mockData'
+
 import { useState } from 'react'
 import React from 'react'
 
@@ -20,7 +21,14 @@ export default function ThreatCatalog() {
     <div className="page">
       <div className="page-header">
         <h1 className="page-title">Threat Catalog</h1>
-        <p className="page-subtitle">36-vector attack taxonomy across 8 families</p>
+        <p className="page-subtitle">36 vectors defined across 8 families</p>
+      </div>
+
+      {/* Honest count callout per spec */}
+      <div style={{ marginBottom: 'var(--space-4)', padding: 'var(--space-3) var(--space-4)', background: 'var(--bg-raised)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', fontFamily: 'var(--font-mono)', fontSize: '0.6875rem', color: 'var(--ink-faint)', display: 'inline-flex', gap: 'var(--space-3)' }}>
+        <span><strong style={{ color: 'var(--ink)' }}>36</strong> vectors defined</span>
+        <span style={{ color: 'var(--border-strong)' }}>|</span>
+        <span><strong style={{ color: 'var(--spot)' }}>{MOCK_TAXONOMY.length}</strong> with working generators in this build</span>
       </div>
 
       {/* Filters */}

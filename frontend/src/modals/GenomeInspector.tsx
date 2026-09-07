@@ -193,7 +193,7 @@ export function GenomeInspector({ genome, onClose }: GenomeInspectorProps) {
                   </div>
                   <ProgressBar
                     value={val}
-                    variant={val > 0.7 ? 'defense' : 'default'}
+                    variant={val > 0.7 ? 'defense' : 'spot'}
                   />
                 </div>
               ))}

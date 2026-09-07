@@ -2,14 +2,9 @@ import React from 'react'
 import { Card } from '../components/ui/Card'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+import { LoopHelix3D } from '../three/LoopHelix3D'
 import { MOCK_GENERATIONS } from '../services/mockData'
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
+import { useAppStore } from '../stores/appStore'
 
 const ROUNDS = [
   { version: 'v1.0', evasions: 12, f1: 0.948, recall: 0.82, fpr: 0.028, notes: 'Baseline - 36 vectors tested' },
@@ -18,7 +13,8 @@ const ROUNDS = [
 ]
 
 export default function Evolution() {
-  const chartData = ROUNDS.map(r => ({ round: `Defense ${r.version}`, evasion: r.evasions, f1: r.f1 * 100 }))
+  const mode = useAppStore(s => s.mode)
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   return (
     <div className="page">
@@ -41,11 +37,15 @@ export default function Evolution() {
             <div className="flex gap-4" style={{ marginBottom: 12 }}>
               <div>
                 <div className="text-annotation" style={{ color: 'var(--ink-faint)' }}>Evasions</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: r.evasions === 0 ? 'var(--good)' : r.evasions < 5 ? 'var(--warn)' : 'var(--attack)', fontSize: '1.25rem' }}>{r.evasions}</div>
+                <div style={{
+                  fontFamily: 'var(--font-mono)',
+                  color: r.evasions === 0 ? 'var(--ink)' : r.evasions < 5 ? 'var(--ink-muted)' : 'var(--ink-faint)',
+                  fontSize: '1.25rem'
+                }}>{r.evasions}</div>
               </div>
               <div>
                 <div className="text-annotation" style={{ color: 'var(--ink-faint)' }}>F1</div>
-                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--good)', fontSize: '1.25rem' }}>{r.f1.toFixed(3)}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', color: 'var(--ink)', fontSize: '1.25rem' }}>{r.f1.toFixed(3)}</div>
               </div>
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--ink-faint)' }}>{r.notes}</p>
@@ -53,27 +53,39 @@ export default function Evolution() {
         ))}
       </div>
 
-      {/* Evasion chart */}
-      <Card className="mb-6">
-        <div className="chart-title mb-4">Evasion Rate Reduction per Round</div>
-        <ResponsiveContainer width="100%" height={200}>
-          <LineChart data={chartData}>
-            <CartesianGrid stroke="var(--border)" />
-            <XAxis dataKey="round" tick={{ fontFamily: 'var(--font-mono)', fontSize: 11, fill: 'var(--ink-muted)' }} />
-            <YAxis tick={{ fontFamily: 'var(--font-mono)', fontSize: 11, fill: 'var(--ink-muted)' }} />
-            <Tooltip contentStyle={{ background: 'var(--bg-raised)', border: '1px solid var(--border)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: 12 }} />
-            <Line type="monotone" dataKey="evasion" name="Evasions" stroke="var(--attack)" strokeWidth={2} dot={{ fill: 'var(--attack)', r: 5 }} />
-          </LineChart>
-        </ResponsiveContainer>
+      {/* Co-evolution helix */}
+      <Card className="mb-6" noHover>
+        <div className="flex items-center justify-between mb-2">
+          <div className="chart-title" style={{ margin: 0 }}>Co-Evolution Feedback Helix</div>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <div style={{ width: 24, height: 2, background: 'var(--ink-muted)' }} />
+              <span className="text-annotation" style={{ color: 'var(--ink-faint)' }}>Fixed set detection</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div style={{ width: 24, height: 2, background: 'var(--spot)' }} />
+              <span className="text-annotation" style={{ color: 'var(--ink-faint)' }}>New vector detection</span>
+            </div>
+          </div>
+        </div>
+        <p style={{ fontSize: '0.75rem', color: 'var(--ink-faint)', marginBottom: 'var(--space-4)', fontFamily: 'var(--font-mono)' }}>
+          Each turn = one generation. Contracting radius = more detections. Gap between lines = generalization lag.
+        </p>
+        <LoopHelix3D
+          generations={MOCK_GENERATIONS}
+          attacker={mode === 'attacker'}
+          reduced={reduced}
+          height={380}
+        />
       </Card>
 
       {/* Zero-shot holdout */}
       <Card>
         <div className="chart-title mb-4">Zero-Shot Holdout - ADV-01 Family (Never seen in training)</div>
         <div className="grid grid-3 gap-4">
-          <StatCard label="Baseline (v1.0)"   value="0.0%"  sub="No detection" tone="bad"  />
-          <StatCard label="Defense v3.0"      value="60.0%" sub="After hardening" tone="good" />
-          <StatCard label="Generalization Delta" value="+60%" sub="Zero-shot improvement" tone="good" />
+          <StatCard label="Baseline (v1.0)"      value="0.0%"  sub="No detection"       tone="bad"  />
+          <StatCard label="Defense v3.0"          value="60.0%" sub="After hardening"     tone="good" />
+          <StatCard label="Generalization Delta"  value="+60%"  sub="Zero-shot improvement" tone="spot" />
         </div>
         <p style={{ marginTop: 'var(--space-4)', fontSize: '0.8125rem', color: 'var(--ink-faint)', fontStyle: 'italic' }}>
           Note: ADV-01 shares the same feature schema as training data. Results are illustrative. Label as demo data in production.

@@ -1,58 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useCallback } from 'react'
-=======
-<<<<<<< HEAD
-import React, { useState } from 'react'
->>>>>>> origin/main
-import { Card } from '../components/ui/Card'
-import { Button } from '../components/ui/Button'
-import { Badge, DecisionBadge } from '../components/ui/Badge'
-import { ProgressBar } from '../components/ui/ProgressBar'
-import { Terminal } from '../components/ui/Terminal'
-import { MOCK_DASHBOARD } from '../services/mockData'
-import { api } from '../services/api'
-import { useAppStore } from '../stores/appStore'
-import type { TerminalLine } from '../components/ui/Terminal'
-import type { ScenarioItem } from '../types'
-import { Zap } from 'lucide-react'
-import {
-  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  CartesianGrid, ReferenceLine,
-} from 'recharts'
-
-const FAMILIES = ['ALL', 'mule_network', 'card_testing', 'account_takeover', 'synthetic_identity', 'cnp_social_engineering']
-
-function buildLog(scenarios: ScenarioItem[], generating: boolean): TerminalLine[] {
-  const now = new Date()
-  const ts = (i: number) => {
-    const d = new Date(now.getTime() + i * 1200)
-    return `[${d.toTimeString().slice(0, 8)}]`
-  }
-
-  if (generating) {
-    return [
-      { id: 'init', text: `${ts(0)} Initializing adversarial campaign...`, type: 'info' },
-      { id: 'tax',  text: `${ts(1)} Loading taxonomy: 36 vectors / 8 families`, type: 'accent' },
-      { id: 'mut',  text: `${ts(2)} Mutator armed - awaiting backend...`, type: 'info' },
-    ]
-  }
-
-  if (scenarios.length === 0) {
-    return [{ id: 'idle', text: 'No campaign run yet. Configure parameters above and click Generate Attacks.', type: 'info' }]
-  }
-
-  return [
-    { id: 'init',  text: `${ts(0)} Adversarial campaign complete.`, type: 'accent' },
-    { id: 'count', text: `${ts(1)} Generated ${scenarios.length} scenarios.`, type: 'info' },
-    ...scenarios.map((s, i) => ({
-      id: `s${i}`,
-      type: s.evaded_detection ? 'warn' as const : 'success' as const,
-      text: `${ts(i + 2)} ${s.attack_vector_id} → ${s.decision} score=${(s.fused_score * 100).toFixed(0)}${s.evaded_detection ? ' [EVADED]' : ''}`,
-    })),
-<<<<<<< HEAD
-=======
-    { id: 'end', text: '[2026-09-03 22:00:12] Campaign complete. 1 evaded, 4 detected.', type: 'accent' },
-=======
 import React, { useState, useCallback } from 'react'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
@@ -99,41 +44,15 @@ function buildLog(scenarios: ScenarioItem[], generating: boolean): TerminalLine[
       type: s.evaded_detection ? 'warn' as const : 'success' as const,
       text: `${ts(i + 2)} ${s.attack_vector_id} → ${s.decision} score=${(s.fused_score * 100).toFixed(0)}${s.evaded_detection ? ' [EVADED]' : ''}`,
     })),
->>>>>>> origin/main
     {
       id: 'end',
       type: 'accent' as const,
       text: `${ts(scenarios.length + 2)} Done. ${scenarios.filter(s => s.evaded_detection).length} evaded, ${scenarios.filter(s => !s.evaded_detection).length} detected.`,
     },
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
   ]
 }
 
 export default function RedTeam() {
-<<<<<<< HEAD
-  const isDemoMode = useAppStore(s => s.isDemoMode)
-  const addNotification = useAppStore(s => s.addNotification)
-
-=======
-<<<<<<< HEAD
->>>>>>> origin/main
-  const [count, setCount] = useState(25)
-  const [strength, setStrength] = useState(0.6)
-  const [sophistication, setSophistication] = useState(7.5)
-  const [family, setFamily] = useState('ALL')
-  const [generating, setGenerating] = useState(false)
-  const [scenarios, setScenarios] = useState<ScenarioItem[]>(MOCK_DASHBOARD.recent_scenarios)
-  const [hasRun, setHasRun] = useState(true)
-
-<<<<<<< HEAD
-=======
-  const scenarios = MOCK_DASHBOARD.recent_scenarios
-  const logs = genLog(scenarios)
-
-=======
   const isDemoMode = useAppStore(s => s.isDemoMode)
   const addNotification = useAppStore(s => s.addNotification)
 
@@ -145,18 +64,11 @@ export default function RedTeam() {
   const [scenarios, setScenarios] = useState<ScenarioItem[]>(MOCK_DASHBOARD.recent_scenarios)
   const [hasRun, setHasRun] = useState(true)
 
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
   const evolutionData = [1, 2, 3].map(round => ({
     round: `v${round}.0`,
     evasion: round === 1 ? 12.8 : round === 2 ? 6.4 : 2.1,
   }))
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> origin/main
   const handleGenerate = useCallback(async () => {
     if (generating) return
     setGenerating(true)
@@ -195,10 +107,6 @@ export default function RedTeam() {
 
   const logs = buildLog(scenarios, generating)
 
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
   return (
     <div className="page">
       <div className="page-header">
@@ -209,24 +117,10 @@ export default function RedTeam() {
       {/* Config panel */}
       <Card className="mb-6">
         <div className="chart-title mb-4">Campaign Configuration</div>
-<<<<<<< HEAD
         <div className="grid grid-4 gap-6 mb-6">
           <div>
             <label className="text-annotation" style={{ color: 'var(--ink-faint)', display: 'block', marginBottom: 8 }}>
               Count: {count}
-=======
-<<<<<<< HEAD
-        <div className="grid grid-3 gap-6 mb-6">
-          <div>
-            <label className="text-annotation" style={{ color: 'var(--ink-faint)', display: 'block', marginBottom: 8 }}>
-              Scenario Count: {count}
-=======
-        <div className="grid grid-4 gap-6 mb-6">
-          <div>
-            <label className="text-annotation" style={{ color: 'var(--ink-faint)', display: 'block', marginBottom: 8 }}>
-              Count: {count}
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
             </label>
             <input id="red-count" type="range" className="slider" min={5} max={100} step={5} value={count} onChange={e => setCount(+e.target.value)} />
           </div>
@@ -242,7 +136,6 @@ export default function RedTeam() {
             </label>
             <input id="red-mutation" type="range" className="slider" min={0.1} max={1} step={0.05} value={strength} onChange={e => setStrength(+e.target.value)} />
           </div>
-<<<<<<< HEAD
           <div>
             <label className="text-annotation" style={{ color: 'var(--ink-faint)', display: 'block', marginBottom: 8 }}>
               Family
@@ -252,22 +145,6 @@ export default function RedTeam() {
             </select>
           </div>
         </div>
-=======
-<<<<<<< HEAD
-        </div>
-        <Button variant="primary" icon={<Zap size={14} />} onClick={() => setHasRun(true)}>
-          Generate Attacks
-=======
-          <div>
-            <label className="text-annotation" style={{ color: 'var(--ink-faint)', display: 'block', marginBottom: 8 }}>
-              Family
-            </label>
-            <select id="red-family" className="select" value={family} onChange={e => setFamily(e.target.value)}>
-              {FAMILIES.map(f => <option key={f} value={f}>{f === 'ALL' ? 'All Families' : f.replace(/_/g, ' ')}</option>)}
-            </select>
-          </div>
-        </div>
->>>>>>> origin/main
         <Button
           id="red-generate-btn"
           variant="primary"
@@ -276,20 +153,11 @@ export default function RedTeam() {
           loading={generating}
         >
           {generating ? 'Generating...' : 'Generate Attacks'}
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
         </Button>
       </Card>
 
       {hasRun && (
         <>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> origin/main
           {/* Stats row */}
           <div className="flex gap-4 mb-6" style={{ flexWrap: 'wrap' }}>
             {[
@@ -320,30 +188,16 @@ export default function RedTeam() {
             ))}
           </div>
 
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
           <div className="grid grid-2 mb-6" style={{ alignItems: 'start' }}>
             {/* Results table */}
             <Card noPad>
               <div style={{ padding: 'var(--space-5) var(--space-6) var(--space-3)' }}>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                <div className="chart-title" style={{ margin: 0 }}>Scenarios ({scenarios.length})</div>
-=======
->>>>>>> origin/main
                 <div className="flex items-center justify-between">
                   <div className="chart-title" style={{ margin: 0 }}>Scenarios ({scenarios.length})</div>
                   {scenarios.some(s => s.evaded_detection) && (
                     <Badge variant="block">{scenarios.filter(s => s.evaded_detection).length} evaded</Badge>
                   )}
                 </div>
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
               </div>
               <div className="table-wrap" style={{ border: 'none', borderRadius: 0, maxHeight: 320, overflowY: 'auto' }}>
                 <table>
@@ -362,24 +216,12 @@ export default function RedTeam() {
                           <div style={{ fontSize: '0.6875rem', color: 'var(--ink-faint)', marginTop: 2 }}>{s.attack_family.replace(/_/g, ' ')}</div>
                         </td>
                         <td>
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-                          <span style={{ fontFamily: 'var(--font-mono)', color: s.fused_score > 0.6 ? 'var(--good)' : s.fused_score > 0.3 ? 'var(--warn)' : 'var(--attack)' }}>
-                            {(s.fused_score * 100).toFixed(0)}
-                          </span>
-=======
->>>>>>> origin/main
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             <ProgressBar value={s.fused_score} variant={s.fused_score > 0.6 ? 'defense' : s.fused_score > 0.3 ? 'spot' : 'attack'} style={{ width: 48 }} />
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: s.fused_score > 0.6 ? 'var(--good)' : s.fused_score > 0.3 ? 'var(--warn)' : 'var(--attack)' }}>
                               {(s.fused_score * 100).toFixed(0)}
                             </span>
                           </div>
-<<<<<<< HEAD
-=======
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
                         </td>
                         <td><DecisionBadge decision={s.decision} /></td>
                       </tr>
@@ -392,15 +234,7 @@ export default function RedTeam() {
             {/* Log terminal */}
             <Card>
               <div className="chart-title mb-3">Campaign Log</div>
-<<<<<<< HEAD
               <Terminal lines={logs} height={320} />
-=======
-<<<<<<< HEAD
-              <Terminal lines={logs} height={280} />
-=======
-              <Terminal lines={logs} height={320} />
->>>>>>> 8329ade9e9dad12182be696d7591cfd08816bc0e
->>>>>>> origin/main
             </Card>
           </div>
 

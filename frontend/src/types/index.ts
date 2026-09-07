@@ -260,3 +260,47 @@ export interface ModelRecord {
   is_active: boolean
   training_notes?: string
 }
+
+// Live payment stream row (Phase 3)
+export type PaymentRail = 'UPI_P2M' | 'IMPS' | 'NEFT' | 'RTP_FEDNOW' | 'SEPA_INST' | 'CARD_CNP'
+export type PaymentChannel = 'mobile' | 'web' | 'agentic' | 'IVR'
+export type StreamDecision = 'APPROVE' | 'ALERT' | 'BLOCK'
+export type DetectionLayer = 'L0' | 'L1' | 'L2' | 'L3'
+export type StreamOutcome = 'TP' | 'TN' | 'FP' | 'FN'
+
+export interface ScoredPayment {
+  txn_id: string
+  timestamp: string          // HH:MM:SS format
+  payer_id: string           // short anonymised ID, e.g. "TXN_7F2A"
+  amount: number             // INR
+  rail: PaymentRail
+  channel: PaymentChannel
+  attack_family: string | null   // from Titan's 36-vector taxonomy, null if legit
+  attack_vector_id: string | null
+  score: number              // 0.0 - 1.0
+  decision: StreamDecision
+  layer_fired: DetectionLayer | null  // null for APPROVEs
+  is_fraud: boolean          // ground truth label
+  // outcome (TP/TN/FP/FN) is derived at render time from { decision, is_fraud }
+}
+
+export interface StreamCounters {
+  scored: number
+  blocksRaised: number
+  alertsRaised: number
+  approvalsIssued: number
+  valueStopped: number       // INR, only climbs on BLOCK/ALERT where is_fraud=true
+  fraudSeen: number
+  fraudStopped: number
+  legitimateCount: number
+  falsePositives: number
+  realisedFpr: number | null // null until legitimateCount >= 200
+}
+
+/** Derive the confusion-matrix outcome from decision + ground truth */
+export function deriveOutcome(decision: StreamDecision, is_fraud: boolean): StreamOutcome {
+  if (is_fraud && decision !== 'APPROVE') return 'TP'
+  if (!is_fraud && decision === 'APPROVE') return 'TN'
+  if (!is_fraud && decision !== 'APPROVE') return 'FP'
+  return 'FN' // is_fraud && decision === 'APPROVE'
+}
