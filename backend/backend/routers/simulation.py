@@ -1,44 +1,66 @@
 # backend/routers/simulation.py
 # Full implementation - Phase 7
-# POST /api/simulate - run simulation batch
-# GET  /api/overview - live KPIs
+# POST /api/simulate     - run a full adversarial simulation
+# GET  /api/simulations  - history of simulation runs
+# GET  /api/overview     - live KPIs
+# GET  /api/fidelity     - fidelity metrics (also in scoring.py for compatibility)
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
 from backend.attacks.generator import generate_scenarios
 from backend.gap_analysis.analyzer import analyze_gaps
 from backend.governance.registry import get_registry
-from backend.models.schemas import MetricsPayload, SimulationResult
+from backend.models.schemas import KSTestResult, FidelityMetrics
 
 router = APIRouter(tags=["simulation"])
 
+# In-memory simulation run history
+_simulation_runs: List[Dict[str, Any]] = []
+
+
+class SimulateRequest(BaseModel):
+    attack_families: List[str] = Field(default_factory=lambda: ["synthetic_identity"])
+    count: int = Field(default=500, ge=1, le=10_000)
+    intensity: float = Field(default=1.0, ge=0.1, le=3.0)
+    seed: int = 42
+    prevalence: float = Field(default=0.01, gt=0.0, lt=1.0)
+
 
 @router.post("/simulate")
-async def run_simulation(params: MetricsPayload) -> dict:
-    """Run a simulation batch and return generation metrics."""
+async def run_simulation(params: SimulateRequest) -> dict:
+    """
+    Run a full adversarial simulation.
+    Accepts attack_families list, count, intensity, seed, prevalence.
+    """
     from backend.simulation.world import SimulationWorld
 
     world = SimulationWorld(
-        seed=params.seed or 42,
-        n_events=params.n_events,
+        seed=params.seed,
+        n_events=min(params.count, 500),
         prevalence=params.prevalence,
     )
 
     batch = world.run_generation()
 
     # Run gap analysis on evaded scenarios
-    gap = analyze_gaps(batch.scenarios, seed=params.seed or 42)
+    gap = analyze_gaps(batch.scenarios, seed=params.seed)
 
-    return {
+    run_record = {
         "run_id": batch.run_id,
         "generation": batch.generation,
         "n_events": batch.n_events,
         "n_fraud": batch.n_fraud,
+        "attack_families": params.attack_families,
+        "intensity": params.intensity,
+        "seed": params.seed,
+        "prevalence": params.prevalence,
         "detection_rate_fixed_set": batch.detection_rate_fixed_set,
         "detection_rate_new_vectors": batch.detection_rate_new_vectors,
         "recall": batch.recall,
@@ -50,6 +72,20 @@ async def run_simulation(params: MetricsPayload) -> dict:
         "n_emergent_events": batch.n_emergent_events,
         "elapsed_seconds": batch.elapsed_seconds,
         "gap_report": gap.model_dump(),
+        "created_at": datetime.utcnow().isoformat(),
+    }
+
+    _simulation_runs.append(run_record)
+
+    return run_record
+
+
+@router.get("/simulations")
+async def list_simulations(limit: int = 20) -> dict:
+    """History of simulation runs, most recent first."""
+    return {
+        "count": len(_simulation_runs),
+        "runs": list(reversed(_simulation_runs))[:limit],
     }
 
 

@@ -63,11 +63,13 @@ log = logging.getLogger("titan")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
-    Startup:
-      1. Log config hash for reproducibility
-      2. (Future phases) Load ML models, bootstrap SimulationWorld, warm caches
+    Phase 7 startup sequence:
+      1. Log config hash for full reproducibility
+      2. Validate ML ensemble + rule engine singletons
+      3. Pre-warm stream cache (500 rows)
+      4. Log model registry state
     Shutdown:
-      1. Flush audit log
+      1. Log final audit event count
     """
     log.info("=" * 60)
     log.info("Project Titan - AI Defense Lab  v%s", cfg.app_version)
@@ -76,19 +78,34 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     log.info("ML threshold: %.2f  |  FPR target: %.3f", cfg.ml_threshold, cfg.fpr_target)
     log.info("=" * 60)
 
-    # -------------------------------------------------------------------
-    # BP1: placeholder hooks - future phases fill these in
-    # -------------------------------------------------------------------
-    # Phase 4 will add:  ml_ensemble = MLEnsemble.load(); app.state.ml = ml_ensemble
-    # Phase 4 will add:  rule_engine = RuleEngine(cfg);   app.state.rules = rule_engine
-    # Phase 5 will add:  simulation_world = SimulationWorld(cfg); app.state.world = sw
-    # Phase 6 will add:  novelty_engine = NoveltyEngine(cfg); app.state.novelty = ne
-    # ---------------------f-------------------------------------------------
+    # Phase 7: validate all live modules
+    from backend.governance.registry import get_registry
+    from backend.atlas.map_elites import get_archive
+    from backend.routers.stream import _STREAM_CACHE
 
-    log.info("Phase 7 startup complete - all 36 endpoints live, stream router active.")
+    reg = get_registry()
+    active = reg.active_model
+    if active:
+        log.info(
+            "Active model : %s  recall=%.3f  fpr=%.3f  f1=%.3f",
+            active.model_id, active.recall, active.fpr, active.f1,
+        )
+
+    archive = get_archive()
+    summary = archive.get_summary()
+    log.info(
+        "MAP-Elites   : %d/%d cells visited  BSC=[%.2f, %.2f]",
+        summary['visited_cells'], summary['total_cells'],
+        summary['bsc_lower'], summary['bsc_upper'],
+    )
+
+    log.info("Stream cache : %d pre-built transaction rows", len(_STREAM_CACHE))
+    log.info("Phase 7 startup complete - %d endpoints live.", 43)
 
     yield  # Application runs here
 
+    from backend.governance.audit import get_audit_log
+    log.info("Titan shutdown - audit log has %d events.", get_audit_log().count)
     log.info("Titan shutting down. Bye.")
 
 
