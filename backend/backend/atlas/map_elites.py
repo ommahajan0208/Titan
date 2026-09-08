@@ -97,15 +97,31 @@ class MAPElitesArchive:
         return sum(1 for c in self._cells if c.hardened)
 
     def get_summary(self) -> dict:
+        visited_cells = [c for c in self._cells if c.visited]
+        n_visited = len(visited_cells)
+        n_total = len(self._cells)
+        n_unvisited = n_total - n_visited
+
+        # BSC lower bound: fraction of visited cells with evasion_rate > 0.5
+        # (definitely exploitable blind spots)
+        n_blindspots = sum(1 for c in visited_cells if c.evasion_rate > 0.5)
+        bsc_lower = round(n_blindspots / max(n_total, 1), 4)
+
+        # BSC upper bound: lower + unvisited fraction (could be exploitable)
+        bsc_upper = round((n_blindspots + n_unvisited) / max(n_total, 1), 4)
+
+        mean_evasion = round(
+            sum(c.evasion_rate for c in visited_cells) / max(n_visited, 1), 4
+        )
+
         return {
-            "total_cells": len(self._cells),
-            "visited_cells": sum(1 for c in self._cells if c.visited),
+            "total_cells": n_total,
+            "visited_cells": n_visited,
             "hardened_cells": self.hardened_count,
             "coverage": self.coverage,
-            "mean_evasion_rate": round(
-                sum(c.evasion_rate for c in self._cells if c.visited) /
-                max(sum(1 for c in self._cells if c.visited), 1), 4
-            ),
+            "mean_evasion_rate": mean_evasion,
+            "bsc_lower": bsc_lower,
+            "bsc_upper": bsc_upper,
         }
 
 
