@@ -90,11 +90,11 @@ export default function RedTeam() {
         mutation_strength: strength,
         family: family === 'ALL' ? undefined : family,
       })
-      setScenarios(results)
-      const evaded = results.filter(s => s.evaded_detection).length
+      setScenarios(results.scenarios)
+      const evaded = results.scenarios.filter(s => s.evaded_detection).length
       addNotification({
         type: evaded > 0 ? 'warn' : 'success',
-        message: `Campaign complete: ${results.length} scenarios, ${evaded} evaded detection.`,
+        message: `Campaign complete: ${results.scenarios.length} scenarios, ${evaded} evaded detection.`,
       })
     } catch (err) {
       // Fallback to mock on API error

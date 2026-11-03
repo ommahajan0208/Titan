@@ -51,6 +51,9 @@ const StreamRow = memo(function StreamRow({ row, fresh, selected, onSelect }: Ro
     <tr
       className={rowClass}
       onClick={onSelect}
+      tabIndex={0}
+      aria-label={`Inspect transaction ${row.txn_id}`}
+      onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSelect() } }}
       title={`Click to inspect ${row.txn_id}`}
     >
       <td>{row.timestamp}</td>

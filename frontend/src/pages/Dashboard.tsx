@@ -1,21 +1,4 @@
-// pages/Dashboard.tsx
-// PRIMARY OPERATIONAL SURFACE - rebuilt around the Live Payment Stream.
-//
-// Layout (top to bottom per implementation_plan_phasebyphase):
-//   ARGUMENT BAR (IDENTIFY | GENERATE | DEFEND | LOOP - clickable, linked)
-//   ┌─────────────────────────────────────┬─────────────────┐
-//   │  LIVE PAYMENT STREAM                │  COUNTER RAIL   │
-//   │  [StreamControls: Pause|Rate|Reset] │  TRANSACTIONS   │
-//   │  [STREAM::DEMO FRAUD OVERSAMPLED]   │  DECISIONS      │
-//   │  TIME PAYER AMOUNT RAIL SCORE       │  VALUE STOPPED  │
-//   │  DECISION OUTCOME                   │  FRAUD STOPPED  │
-//   │  ...rows scroll in...               │  REALISED FPR   │
-//   └─────────────────────────────────────┴─────────────────┘
-//   PERFORMANCE PROBE  [ + ]  (collapsed accordion)
-//   QUICK ACTIONS
-//
-// Design law: no h1 page title, no red/amber/green, stream is the page.
-
+import { DefenseCycle } from '../components/ui/DefenseCycle'
 import { useState, useCallback, useEffect } from 'react'
 import { ArgumentBar } from '../components/ui/ArgumentBar'
 import { PaymentStreamTable } from '../components/ui/PaymentStreamTable'
@@ -68,7 +51,10 @@ export default function Dashboard() {
 
 
   return (
-    <div className="page" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div className="page dashboard-page" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+      <header className="overview-heading"><div><div className="eyebrow">TITAN / OPERATIONS OVERVIEW</div><h1>Stay ahead of the next threat<span>.</span></h1><p>A continuous loop of adversarial testing and adaptive defense.</p></div><div className="overview-status"><span className={running ? 'live-dot' : ''} />{running ? 'Simulation running' : 'Simulation paused'}<small>Payment stream · {rate}× rate</small></div></header>
+      <div className="cycle-container"><DefenseCycle onNavigate={setTab} /></div>
 
       {/* ARGUMENT BAR - thesis strip linking to the 4 capability pages */}
       <div style={{ padding: 'var(--space-4) var(--space-6) 0' }}>
@@ -80,7 +66,7 @@ export default function Dashboard() {
       </div>
 
       {/* STREAM SECTION - main content area */}
-      <div style={{
+      <div className="dashboard-stream" style={{
         display: 'flex',
         flex: 1,
         minHeight: 0,

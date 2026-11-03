@@ -1,4 +1,6 @@
-import { Play } from 'lucide-react'
+import { CommandMenu } from './CommandMenu'
+import { useAppStore } from '../../stores/appStore'
+import { Play, Shield } from 'lucide-react'
 import { ModeToggle } from './ModeToggle'
 import { KpiStrip } from './KpiStrip'
 import type { KpiCellData } from './KpiStrip'
@@ -20,14 +22,14 @@ export function Topbar({ mode, onModeChange, onJudgeDemo, kpiCells, isLive = fal
     <header className="app-topbar">
       <div className="topbar">
         {/* Brand slot - aligned with sidebar icon rail */}
-        <div className="topbar-brand" aria-hidden="true">
-          {/* Sidebar handles the brand mark; topbar just holds the space */}
-        </div>
+        <div className="topbar-brand"><Shield size={22} /><span>TITAN<small>DEFENSE LAB</small></span></div>
 
         {/* KPI strip inline in topbar */}
         <div className="topbar-kpi" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
           <KpiStrip cells={kpiCells} />
         </div>
+
+        <CommandMenu onNavigate={useAppStore.getState().setActiveTab} />
 
         {/* Actions */}
         <div className="topbar-actions">

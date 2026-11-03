@@ -1,3 +1,4 @@
+import { MotionConfig } from 'framer-motion'
 import { useEffect, lazy, Suspense } from 'react'
 import React from 'react'
 import { Topbar } from './components/ui/Topbar'
@@ -126,7 +127,8 @@ export default function App() {
   const PageComponent = PAGE_MAP[activeTab]
 
   return (
-    <div className={`app-shell${mode === 'attacker' ? ' mode-attacker' : ''}`}>
+    <MotionConfig reducedMotion="user"><div className={`app-shell${mode === 'attacker' ? ' mode-attacker' : ''}`}>
+      <a className="skip-link" href="#main-content">Skip to content</a>
       {/* Parallax depth layer */}
       <div className="depth-fore" aria-hidden="true" />
 
@@ -157,7 +159,7 @@ export default function App() {
 
         <main className="app-main" id="main-content">
           <Suspense fallback={<LoadingState message="Loading page..." />}>
-            <PageComponent />
+            <div key={activeTab} className="page-transition"><PageComponent /></div>
           </Suspense>
         </main>
       </div>
@@ -165,6 +167,6 @@ export default function App() {
       {/* Global overlays */}
       <JudgeDemoModal />
       <NotificationToast />
-    </div>
+    </div></MotionConfig>
   )
 }

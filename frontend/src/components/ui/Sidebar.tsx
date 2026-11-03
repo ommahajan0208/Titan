@@ -43,7 +43,7 @@ interface SidebarProps {
 
 import React from 'react'
 
-const NAV_ITEMS: NavItem[] = [
+export const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard',      label: 'Overview',       icon: <LayoutDashboard size={18} /> },
   { id: 'threat-catalog', label: 'Threat Catalog',  icon: <ShieldAlert size={18} />,    badge: 36 },
   { id: 'red-team',       label: 'Red Team',        icon: <Crosshair size={18} /> },
@@ -126,12 +126,10 @@ function DualOrbMini() {
     <div style={{ width: 32, height: 32, flexShrink: 0, position: 'relative' }}>
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
         <circle cx="11" cy="16" r="9" fill="var(--defense)" style={{ mixBlendMode: 'screen' }}>
-          <animateTransform attributeName="transform" type="rotate"
-            from="0 16 16" to="360 16 16" dur="8s" repeatCount="indefinite" />
+          
         </circle>
         <circle cx="21" cy="16" r="9" fill="var(--attack)" style={{ mixBlendMode: 'screen' }}>
-          <animateTransform attributeName="transform" type="rotate"
-            from="360 16 16" to="0 16 16" dur="8s" repeatCount="indefinite" />
+          
         </circle>
       </svg>
     </div>
